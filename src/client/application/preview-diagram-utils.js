@@ -1,3 +1,4 @@
+import { t } from '../i18n/index.js';
 export const IDLE_RENDER_TIMEOUT_MS = 500;
 export const MERMAID_BATCH_SIZE = 2;
 export const MERMAID_RENDER_CACHE_LIMIT = 30;
@@ -104,7 +105,7 @@ export function easeOutCubic(progress) {
   return 1 - ((1 - progress) ** 3);
 }
 
-export function createMermaidPlaceholderCardWithMessage(key, { label = 'Mermaid diagram', message = 'Loads when visible' } = {}) {
+export function createMermaidPlaceholderCardWithMessage(key, { label = t('preview.mermaidDiagram'), message = t('preview.loadsWhenVisible') } = {}) {
   const card = document.createElement('div');
   card.className = 'mermaid-placeholder-card';
 
@@ -121,14 +122,14 @@ export function createMermaidPlaceholderCardWithMessage(key, { label = 'Mermaid 
   button.type = 'button';
   button.className = 'mermaid-placeholder-btn';
   button.dataset.mermaidKey = key;
-  button.textContent = 'Render';
+  button.textContent = t('preview.render');
 
   copy.append(title, subtitle);
   card.append(copy, button);
   return card;
 }
 
-export function createPlantUmlPlaceholderCard(key, message = 'Renders server-side when visible') {
+export function createPlantUmlPlaceholderCard(key, message = t('preview.rendersServerSideWhenVisible')) {
   const card = document.createElement('div');
   card.className = 'plantuml-placeholder-card';
 
@@ -136,7 +137,7 @@ export function createPlantUmlPlaceholderCard(key, message = 'Renders server-sid
   copy.className = 'plantuml-placeholder-copy';
 
   const title = document.createElement('strong');
-  title.textContent = 'PlantUML diagram';
+  title.textContent = t('preview.plantumlDiagram');
 
   const subtitle = document.createElement('span');
   subtitle.textContent = message;
@@ -145,7 +146,7 @@ export function createPlantUmlPlaceholderCard(key, message = 'Renders server-sid
   button.type = 'button';
   button.className = 'plantuml-placeholder-btn';
   button.dataset.plantumlKey = key;
-  button.textContent = 'Render';
+  button.textContent = t('preview.render');
 
   copy.append(title, subtitle);
   card.append(copy, button);
@@ -158,12 +159,12 @@ export function getDiagramErrorLocation(message = '') {
   const column = text.match(/\bcol(?:umn)?(?:\s+number)?\s*[:#]?\s*(\d+)\b/i)?.[1] ?? '';
 
   return [
-    line ? `Line ${line}` : '',
+    line ? t('preview.lineLine', { line }) : '',
     column ? `column ${column}` : '',
   ].filter(Boolean).join(', ');
 }
 
-export function normalizeDiagramError(error, fallback = 'Render failed') {
+export function normalizeDiagramError(error, fallback = t('preview.renderFailed')) {
   const message = error instanceof Error ? error.message : String(error ?? '');
   return message.trim() || fallback;
 }
@@ -171,9 +172,9 @@ export function normalizeDiagramError(error, fallback = 'Render failed') {
 export function createDiagramErrorPlaceholderCard({
   key,
   kind,
-  label = 'Diagram',
-  message = 'Render failed',
-  subtitle = 'The current source could not be rendered.',
+  label = t('common.diagram'),
+  message = t('preview.renderFailed'),
+  subtitle = t('preview.theCurrentSourceCouldNotBeRendered'),
 } = {}) {
   const card = document.createElement('div');
   card.className = `${kind}-placeholder-card diagram-preview-placeholder-card diagram-preview-error-card`;
@@ -184,7 +185,7 @@ export function createDiagramErrorPlaceholderCard({
   copy.className = 'diagram-preview-placeholder-copy';
 
   const title = document.createElement('strong');
-  title.textContent = `${label} needs attention`;
+  title.textContent = t('preview.labelNeedsAttention', { label });
 
   const subtitleNode = document.createElement('span');
   subtitleNode.textContent = subtitle;
@@ -198,7 +199,7 @@ export function createDiagramErrorPlaceholderCard({
 
   const details = document.createElement('details');
   const summary = document.createElement('summary');
-  summary.textContent = 'Details';
+  summary.textContent = t('common.details');
   const detailMessage = document.createElement('code');
   detailMessage.textContent = message;
   details.append(summary, detailMessage);
@@ -207,7 +208,7 @@ export function createDiagramErrorPlaceholderCard({
   button.type = 'button';
   button.className = `${kind}-placeholder-btn diagram-preview-placeholder-btn`;
   button.dataset[`${kind}Key`] = key;
-  button.textContent = 'Retry';
+  button.textContent = t('common.retry');
 
   copy.append(title, subtitleNode);
   if (locationNode) {

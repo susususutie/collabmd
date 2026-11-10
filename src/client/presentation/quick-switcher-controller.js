@@ -1,4 +1,5 @@
 import { createFileSearchEntry, findFileSearchMatch } from '../domain/file-search.js';
+import { t, translateServerMessage } from '../i18n/index.js';
 import { getVaultFileIconSvg } from './file-icon-svg.js';
 import {
   DEFAULT_SEARCH_DEBOUNCE_MS,
@@ -87,7 +88,7 @@ export class QuickSwitcherController {
     const textTab = this.modeTabs.find((tab) => tab.dataset.qsMode === 'text');
     if (textTab && searchConfig.available === false) {
       textTab.disabled = true;
-      textTab.setAttribute('title', searchConfig.unavailableReason || 'Text search is unavailable');
+      textTab.setAttribute('title', translateServerMessage(searchConfig.unavailableReason || 'search.textSearchUnavailable'));
     }
 
     this.filteredFiles = [];
@@ -239,11 +240,11 @@ export class QuickSwitcherController {
 
     if (this.input) {
       this.input.placeholder = normalizedMode === 'text'
-        ? 'Search text in files...'
-        : 'Search files...';
+        ? t('search.searchTextInFiles')
+        : t('search.searchFiles');
       this.input.setAttribute(
         'aria-label',
-        normalizedMode === 'text' ? 'Search text in files' : 'Search files',
+        normalizedMode === 'text' ? t('search.searchTextInFiles2') : t('search.searchFiles2'),
       );
     }
 
@@ -379,7 +380,7 @@ export class QuickSwitcherController {
     if (this.filteredFiles.length === 0) {
       this.setActiveDescendant('');
       if (this.hint) {
-        this.hint.textContent = query ? 'No files found' : 'No files in vault';
+        this.hint.textContent = query ? t('search.noFilesFound') : t('search.noFilesInVault');
         this.hint.classList.remove('hidden');
       }
       return;
@@ -388,8 +389,14 @@ export class QuickSwitcherController {
     if (this.hint) {
       const hint = this.fileResultsTruncated
         ? query
-          ? `Showing the top ${MAX_VISIBLE_RESULTS} of ${this.fileMatchCount} matches. Refine the query to narrow results.`
-          : `Showing the first ${MAX_VISIBLE_RESULTS} of ${this.fileMatchCount} files.`
+          ? t('search.showingTheTopLimitOfTotalMatchesRefineTheQueryTo', {
+            limit: MAX_VISIBLE_RESULTS,
+            total: this.fileMatchCount,
+          })
+          : t('search.showingTheFirstLimitOfTotalFiles', {
+            limit: MAX_VISIBLE_RESULTS,
+            total: this.fileMatchCount,
+          })
         : '';
       this.hint.textContent = hint;
       this.hint.classList.toggle('hidden', !hint);
@@ -475,7 +482,7 @@ export class QuickSwitcherController {
   renderTextState(message) {
     if (!this.resultsList) return;
     this.resultsList.innerHTML = '';
-    this.resultsList.setAttribute('aria-busy', message === 'Searching...' ? 'true' : 'false');
+    this.resultsList.setAttribute('aria-busy', message === t('search.searching') ? 'true' : 'false');
     this.setActiveDescendant('');
     if (this.hint) {
       this.hint.textContent = message;
@@ -490,13 +497,16 @@ export class QuickSwitcherController {
 
     if (!this.textResults?.files?.length || this.textResultItems.length === 0) {
       this.setActiveDescendant('');
-      this.renderTextState(query ? 'No text matches found' : 'Type to search file text');
+      this.renderTextState(query ? t('search.noTextMatchesFound') : t('search.typeToSearchFileText'));
       return;
     }
 
     if (this.hint) {
       const hint = this.textResults.truncated
-        ? `Showing partial results: ${this.textResults.files.length} files and ${formatMatchCount(this.textResults.matchCount, { truncated: true })}. Refine the query to narrow results.`
+        ? t('search.showingPartialResultsFilesFilesAndMatchesRefine', {
+          files: this.textResults.files.length,
+          matches: formatMatchCount(this.textResults.matchCount, { truncated: true }),
+        })
         : '';
       this.hint.textContent = hint;
       this.hint.classList.toggle('hidden', !hint);

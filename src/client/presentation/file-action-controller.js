@@ -19,6 +19,7 @@ import {
 } from '../domain/vault-paths.js';
 import { createFileRouteHash } from '../domain/hash-routes.js';
 import { getActiveVaultId } from '../domain/runtime-paths.js';
+import { t } from '../i18n/index.js';
 import { buttonClassNames } from './components/ui/button.js';
 import { CreateMenuPresenter } from './create-menu-presenter.js';
 
@@ -127,105 +128,105 @@ export class FileActionController {
   getCreateActions({ parentDir = '' } = {}) {
     return [
       {
-        contextLabel: 'Upload files',
-        group: 'File',
-        hint: 'Supported vault files',
+        contextLabel: t('file.uploadFiles'),
+        group: t('common.file'),
+        hint: t('file.supportedVaultFiles'),
         icon: this.getCreateActionIcon('upload'),
         id: 'upload',
-        label: 'Upload files',
-        meta: 'Multiple',
+        label: t('file.uploadFiles'),
+        meta: t('file.multiple'),
         onSelect: () => {
           void this.handleUploadFiles({ parentDir });
         },
       },
       {
-        contextLabel: 'New markdown file',
-        group: 'Note',
-        hint: 'Markdown',
+        contextLabel: t('file.newMarkdownFile'),
+        group: t('common.note'),
+        hint: t('common.markdown'),
         icon: this.getCreateActionIcon('markdown'),
         id: 'markdown',
-        label: 'Markdown note',
+        label: t('file.markdownNote'),
         meta: '.md',
         onSelect: () => this.handleNewFile({ parentDir }),
       },
       {
-        contextLabel: 'New base file',
-        group: 'Note',
-        hint: 'Base',
+        contextLabel: t('file.newBaseFile'),
+        group: t('common.note'),
+        hint: t('file.base'),
         icon: this.getCreateActionIcon('base'),
         id: 'base',
-        label: 'Base file',
+        label: t('file.baseFile'),
         meta: '.base',
         onSelect: () => this.handleNewBase({ parentDir }),
       },
       {
-        contextLabel: 'New canvas',
-        group: 'Diagram',
-        hint: 'JSON Canvas',
+        contextLabel: t('file.newCanvas'),
+        group: t('common.diagram'),
+        hint: t('file.jsonCanvas'),
         icon: this.getCreateActionIcon('canvas'),
         id: 'canvas',
-        label: 'Canvas',
+        label: t('common.canvas'),
         meta: '.canvas',
         onSelect: () => this.handleNewCanvas({ parentDir }),
       },
       {
-        contextLabel: 'New Excalidraw drawing',
-        group: 'Diagram',
-        hint: 'Excalidraw',
+        contextLabel: t('file.newExcalidrawDrawing'),
+        group: t('common.diagram'),
+        hint: t('file.excalidraw'),
         icon: this.getCreateActionIcon('excalidraw'),
         id: 'excalidraw',
-        label: 'Excalidraw drawing',
+        label: t('file.excalidrawDrawing'),
         meta: '.excalidraw',
         onSelect: () => this.handleNewDrawing({ parentDir }),
       },
       {
-        contextLabel: 'New draw.io diagram',
-        group: 'Diagram',
-        hint: 'draw.io',
+        contextLabel: t('file.newDrawIoDiagram'),
+        group: t('common.diagram'),
+        hint: t('file.drawIo'),
         icon: this.getCreateActionIcon('drawio'),
         id: 'drawio',
-        label: 'draw.io diagram',
+        label: t('file.drawIoDiagram'),
         meta: '.drawio',
         onSelect: () => this.handleNewDrawio({ parentDir }),
       },
       {
-        contextLabel: 'New Mermaid diagram',
-        group: 'Diagram',
-        hint: 'Mermaid',
+        contextLabel: t('file.newMermaidDiagram'),
+        group: t('common.diagram'),
+        hint: t('file.mermaid'),
         icon: this.getCreateActionIcon('mermaid'),
         id: 'mermaid',
-        label: 'Mermaid diagram',
+        label: t('file.mermaidDiagram'),
         meta: '.mmd',
         onSelect: () => this.handleNewMermaid({ parentDir }),
       },
       {
-        contextLabel: 'New PlantUML diagram',
-        group: 'Diagram',
-        hint: 'PlantUML',
+        contextLabel: t('file.newPlantumlDiagram'),
+        group: t('common.diagram'),
+        hint: t('file.plantuml'),
         icon: this.getCreateActionIcon('plantuml'),
         id: 'plantuml',
-        label: 'PlantUML diagram',
+        label: t('file.plantumlDiagram'),
         meta: '.puml',
         onSelect: () => this.handleNewPlantUml({ parentDir }),
       },
       {
-        contextLabel: 'New Structurizr workspace',
-        group: 'Diagram',
-        hint: 'Structurizr DSL',
+        contextLabel: t('file.newStructurizrWorkspace'),
+        group: t('common.diagram'),
+        hint: t('file.structurizrDsl'),
         icon: this.getCreateActionIcon('structurizr'),
         id: 'structurizr',
-        label: 'Structurizr workspace',
+        label: t('file.structurizrWorkspace'),
         meta: '.dsl',
         onSelect: () => this.handleNewStructurizr({ parentDir }),
       },
       {
-        contextLabel: 'New folder',
-        group: 'Structure',
-        hint: 'Folder',
+        contextLabel: t('common.newFolder'),
+        group: t('file.structure'),
+        hint: t('common.folder'),
         icon: this.getCreateActionIcon('folder'),
         id: 'folder',
-        label: 'Folder',
-        meta: 'folder',
+        label: t('common.folder'),
+        meta: t('file.folderTypeHint'),
         onSelect: () => this.handleNewFolder({ parentDir }),
       },
     ];
@@ -241,27 +242,27 @@ export class FileActionController {
   getDirectoryContextMenuItems(directoryPath) {
     return [
       {
-        label: 'New…',
+        label: t('file.new'),
         onSelect: ({ anchor } = {}) => this.openCreateMenu({ anchor, parentDir: directoryPath }),
       },
       {
-        label: 'Rename / move',
+        label: t('file.renameMove'),
         onSelect: () => this.handleRenameDirectory(directoryPath),
       },
       {
-        label: 'Download source ZIP',
+        label: t('file.downloadSourceZip'),
         onSelect: () => this.handleDownloadDirectory(directoryPath),
       },
       {
-        label: 'Export HTML',
+        label: t('file.exportHtml'),
         onSelect: () => this.onDirectoryExport?.(directoryPath, 'html'),
       },
       {
-        label: 'Print / save PDF',
+        label: t('file.printSavePdf'),
         onSelect: () => this.onDirectoryExport?.(directoryPath, 'pdf'),
       },
       {
-        label: 'Delete',
+        label: t('common.delete'),
         danger: true,
         onSelect: () => this.handleDeleteDirectory(directoryPath),
       },
@@ -271,19 +272,19 @@ export class FileActionController {
   getFileContextMenuItems(filePath) {
     return [
       {
-        label: 'Copy as URL',
+        label: t('file.copyAsUrl'),
         onSelect: () => this.copyFileUrl(filePath),
       },
       {
-        label: 'Rename / move',
+        label: t('file.renameMove'),
         onSelect: () => this.handleRenameFile(filePath),
       },
       {
-        label: 'Download',
+        label: t('common.download'),
         onSelect: () => this.handleDownloadFile(filePath),
       },
       {
-        label: 'Delete',
+        label: t('common.delete'),
         danger: true,
         onSelect: () => this.handleDelete(filePath),
       },
@@ -298,9 +299,9 @@ export class FileActionController {
     url.hash = createFileRouteHash(filePath);
     try {
       await copyTextToClipboard(url.toString());
-      this.showToast('Link copied');
+      this.showToast(t('file.linkCopied'));
     } catch {
-      this.showToast('Failed to copy link');
+      this.showToast(t('file.failedToCopyLink'));
     }
   }
 
@@ -369,15 +370,15 @@ export class FileActionController {
   openActionDialog({
     title,
     copy,
-    label = 'Path',
+    label = t('common.path'),
     hint = '',
     note = '',
     placeholder = '',
     value = '',
-    submitLabel = 'Save',
+    submitLabel = t('common.save'),
     destructive = false,
     requiresInput = true,
-    emptyMessage = 'A value is required',
+    emptyMessage = t('file.aValueIsRequired'),
     onSubmit,
   }) {
     if (!this.actionDialog || !this.actionTitle || !this.actionCopy || !this.actionSubmitButton || !this.actionCancelButton) {
@@ -460,7 +461,7 @@ export class FileActionController {
       this.actionField.hidden = false;
     }
     if (this.actionLabel) {
-      this.actionLabel.textContent = 'Path';
+      this.actionLabel.textContent = t('common.path');
     }
     if (this.actionInput) {
       this.actionInput.value = '';
@@ -478,7 +479,7 @@ export class FileActionController {
       this.actionNote.classList.remove('is-danger');
     }
     if (this.actionSubmitButton) {
-      this.actionSubmitButton.textContent = 'Save';
+      this.actionSubmitButton.textContent = t('common.save');
       this.actionSubmitButton.disabled = false;
       this.actionSubmitButton.className = buttonClassNames({ variant: 'primary' });
     }
@@ -535,7 +536,7 @@ export class FileActionController {
     try {
       shouldClose = await this.pendingAction.onSubmit(rawValue);
     } catch (error) {
-      this.showError('Failed to complete action', error);
+      this.showError(t('file.failedToCompleteAction'), error);
     }
 
     this.setActionDialogBusy(false);
@@ -559,7 +560,7 @@ export class FileActionController {
       const fileName = getVaultPathLeaf(file?.name);
       const filePath = composeVaultChildPath(normalizedParentDir, fileName);
       if (!fileName || !isVaultFilePath(filePath)) {
-        this.showToast(`Unsupported file type: ${fileName || 'unnamed file'}`);
+        this.showToast(t('file.unsupportedFileTypeFilename', { fileName: fileName || t('file.unnamedFile') }));
         continue;
       }
 
@@ -572,7 +573,7 @@ export class FileActionController {
         uploaded = true;
         this.state.expandDirectoryPath(filePath, { includeLeaf: false });
       } catch (error) {
-        this.showToast(`${fileName}: ${error?.message || 'Failed to upload file'}`);
+        this.showToast(`${fileName}: ${error?.message || t('file.failedToUploadFile')}`);
       }
     }
 
@@ -592,7 +593,7 @@ export class FileActionController {
     return this.uploadVaultFiles(files, { parentDir });
   }
 
-  async createVaultFile(filePath, content, { openAfterCreate = false, errorMessage = 'Failed to create file' } = {}) {
+  async createVaultFile(filePath, content, { openAfterCreate = false, errorMessage = t('file.failedToCreateFile') } = {}) {
     try {
       await this.runWorkspaceMutation((requestId) => this.vaultClient.createFile(withRequestId({
         content,
@@ -615,7 +616,7 @@ export class FileActionController {
   async createDirectory(pathValue) {
     const directoryPath = normalizeVaultPathInput(pathValue);
     if (!directoryPath) {
-      this.showToast('Folder path is required');
+      this.showToast(t('file.folderPathIsRequired'));
       return false;
     }
 
@@ -628,7 +629,7 @@ export class FileActionController {
       await this.refresh();
       return true;
     } catch (error) {
-      this.showToast(error?.message || 'Failed to create folder');
+      this.showToast(error?.message || t('file.failedToCreateFolder'));
       return false;
     }
   }
@@ -636,13 +637,13 @@ export class FileActionController {
   async renameVaultFile(filePath, nextName, extension) {
     const normalizedPath = normalizeVaultPathInput(nextName);
     if (!normalizedPath) {
-      this.showToast('File path is required');
+      this.showToast(t('file.filePathIsRequired'));
       return false;
     }
 
     const requestedExtension = getVaultFileExtension(normalizedPath);
     if (requestedExtension && requestedExtension.toLowerCase() !== String(extension ?? '').toLowerCase()) {
-      this.showToast(`File type changes are not supported during rename. Keep the ${extension} extension.`);
+      this.showToast(t('file.fileTypeChangesAreNotSupportedDuringRenameKeep', { extension }));
       return false;
     }
 
@@ -650,7 +651,7 @@ export class FileActionController {
       ? normalizedPath
       : `${normalizedPath}${extension}`;
     if (!getVaultPathLeaf(finalPath)) {
-      this.showToast('File path is required');
+      this.showToast(t('file.filePathIsRequired'));
       return false;
     }
 
@@ -673,7 +674,7 @@ export class FileActionController {
 
       return true;
     } catch (error) {
-      this.showToast(error?.message || 'Failed to rename');
+      this.showToast(error?.message || t('file.failedToRename'));
       return false;
     }
   }
@@ -681,7 +682,7 @@ export class FileActionController {
   async renameDirectory(oldPath, nextPath) {
     const normalizedPath = normalizeVaultPathInput(nextPath);
     if (!normalizedPath) {
-      this.showToast('Folder path is required');
+      this.showToast(t('file.folderPathIsRequired'));
       return false;
     }
 
@@ -706,7 +707,7 @@ export class FileActionController {
 
       return true;
     } catch (error) {
-      this.showToast(error?.message || 'Failed to rename folder');
+      this.showToast(error?.message || t('file.failedToRenameFolder'));
       return false;
     }
   }
@@ -723,7 +724,7 @@ export class FileActionController {
 
       return true;
     } catch (error) {
-      this.showToast(error?.message || 'Failed to delete');
+      this.showToast(error?.message || t('file.failedToDelete'));
       return false;
     }
   }
@@ -745,7 +746,7 @@ export class FileActionController {
 
       return true;
     } catch (error) {
-      this.showToast(error?.message || 'Failed to delete folder');
+      this.showToast(error?.message || t('file.failedToDeleteFolder'));
       return false;
     }
   }
@@ -757,20 +758,20 @@ export class FileActionController {
     const entryName = getVaultPathLeaf(normalizedSourcePath);
 
     if (!normalizedSourcePath || !entryName) {
-      return { ok: false, reason: 'Invalid item to move' };
+      return { ok: false, reason: t('file.invalidItemToMove') };
     }
 
     if (currentParentPath === normalizedDestinationDirectory) {
-      return { ok: false, reason: 'Item is already in that folder' };
+      return { ok: false, reason: t('file.itemIsAlreadyInThatFolder') };
     }
 
     if (sourceType === 'directory') {
       if (normalizedDestinationDirectory === normalizedSourcePath) {
-        return { ok: false, reason: 'A folder cannot be moved into itself' };
+        return { ok: false, reason: t('file.aFolderCannotBeMovedIntoItself') };
       }
 
       if (normalizedDestinationDirectory.startsWith(`${normalizedSourcePath}/`)) {
-        return { ok: false, reason: 'A folder cannot be moved into one of its descendants' };
+        return { ok: false, reason: t('file.aFolderCannotBeMovedIntoOneOfItsDescendants') };
       }
 
       return {
@@ -810,7 +811,7 @@ export class FileActionController {
       await this.vaultClient.downloadFile(filePath);
       return true;
     } catch (error) {
-      this.showToast(error?.message || 'Failed to download file');
+      this.showToast(error?.message || t('file.failedToDownloadFile'));
       return false;
     }
   }
@@ -820,7 +821,7 @@ export class FileActionController {
       await this.vaultClient.downloadDirectory(directoryPath);
       return true;
     } catch (error) {
-      this.showToast(error?.message || 'Failed to download folder');
+      this.showToast(error?.message || t('file.failedToDownloadFolder'));
       return false;
     }
   }
@@ -830,10 +831,9 @@ export class FileActionController {
 
     return {
       hintPrefix: normalizedParentDir
-        ? 'Use "/" to create nested items under this folder.'
-        : 'Use "/" to place it inside a folder.',
-      inputLabelSuffix: normalizedParentDir ? 'name or path' : 'path',
-      note: normalizedParentDir ? `Parent folder: ${normalizedParentDir}` : '',
+        ? t('file.useToCreateNestedItemsUnderThisFolder')
+        : t('file.useToPlaceItInsideAFolder'),
+      note: normalizedParentDir ? t('file.parentFolderPath', { path: normalizedParentDir }) : '',
       normalizedParentDir,
     };
   }
@@ -848,7 +848,7 @@ export class FileActionController {
     this.createMenu.toggle({
       anchor,
       items: this.getCreateActions({ parentDir }),
-      title: 'Create',
+      title: t('common.create'),
     });
   }
 
@@ -860,14 +860,14 @@ export class FileActionController {
       items: [{
         icon: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3.5-6 10-6 10 6 10 6-3.5 6-10 6S2 12 2 12Z"></path><circle cx="12" cy="12" r="2.5"></circle></svg>',
         id: 'show-file-extensions',
-        label: 'Show file extensions',
-        meta: this.showFileExtensions ? 'On' : 'Off',
+        label: t('file.showFileExtensions'),
+        meta: this.showFileExtensions ? t('common.on') : t('common.off'),
         onSelect: () => {
           this.showFileExtensions = !this.showFileExtensions;
           this.onShowFileExtensionsChange?.(this.showFileExtensions);
         },
       }],
-      title: 'File explorer options',
+      title: t('file.fileExplorerOptions'),
     });
   }
 
@@ -875,26 +875,26 @@ export class FileActionController {
     const context = this.getCreateContext(parentDir);
 
     this.openActionDialog({
-      title: 'Create markdown file',
+      title: t('file.createMarkdownFile'),
       copy: context.normalizedParentDir
-        ? 'Add a new note inside the selected folder. It opens immediately after creation.'
-        : 'Add a new note to the vault. It opens immediately after creation.',
-      label: `File ${context.inputLabelSuffix}`,
-      hint: `${context.hintPrefix} ".md" is added automatically.`,
+        ? t('file.addANewNoteInsideTheSelectedFolderItOpens')
+        : t('file.addANewNoteToTheVaultItOpensImmediatelyAfter'),
+      label: context.normalizedParentDir ? t('file.fileNameOrPath') : t('file.filePath'),
+      hint: t('file.prefixMdIsAddedAutomatically', { prefix: context.hintPrefix }),
       note: context.note,
       placeholder: context.normalizedParentDir ? 'my-note' : 'notes/my-note',
-      submitLabel: 'Create file',
-      emptyMessage: 'File path is required',
+      submitLabel: t('file.createFile'),
+      emptyMessage: t('file.filePathIsRequired'),
       onSubmit: (value) => {
         const normalizedPath = normalizeVaultPathInput(value);
         if (!normalizedPath) {
-          this.showToast('File path is required');
+          this.showToast(t('file.filePathIsRequired'));
           return false;
         }
 
         const filePath = ensureVaultExtension(composeVaultChildPath(context.normalizedParentDir, normalizedPath), '.md');
         return this.createVaultFile(filePath, createMarkdownStarter(filePath), {
-          errorMessage: 'Failed to create file',
+          errorMessage: t('file.failedToCreateFile'),
           openAfterCreate: true,
         });
       },
@@ -905,26 +905,26 @@ export class FileActionController {
     const context = this.getCreateContext(parentDir);
 
     this.openActionDialog({
-      title: 'Create base file',
+      title: t('file.createBaseFile'),
       copy: context.normalizedParentDir
-        ? 'Add a new `.base` file inside the selected folder. It opens immediately after creation.'
-        : 'Add a new `.base` file to the vault. It opens immediately after creation.',
-      label: `Base ${context.inputLabelSuffix}`,
-      hint: `${context.hintPrefix} ".base" is added automatically.`,
+        ? t('file.addANewBaseFileInsideTheSelectedFolderItOpens')
+        : t('file.addANewBaseFileToTheVaultItOpensImmediatelyAfter'),
+      label: context.normalizedParentDir ? t('file.baseNameOrPath') : t('file.basePath'),
+      hint: t('file.prefixBaseIsAddedAutomatically', { prefix: context.hintPrefix }),
       note: context.note,
       placeholder: context.normalizedParentDir ? 'table-view' : 'views/table-view',
-      submitLabel: 'Create base',
-      emptyMessage: 'Base path is required',
+      submitLabel: t('file.createBase'),
+      emptyMessage: t('file.basePathIsRequired'),
       onSubmit: (value) => {
         const normalizedPath = normalizeVaultPathInput(value);
         if (!normalizedPath) {
-          this.showToast('Base path is required');
+          this.showToast(t('file.basePathIsRequired'));
           return false;
         }
 
         const starter = createBaseStarter(composeVaultChildPath(context.normalizedParentDir, normalizedPath));
         return this.createVaultFile(starter.path, starter.content, {
-          errorMessage: 'Failed to create base file',
+          errorMessage: t('file.failedToCreateBaseFile'),
           openAfterCreate: true,
         });
       },
@@ -935,16 +935,16 @@ export class FileActionController {
     const context = this.getCreateContext(parentDir);
 
     this.openActionDialog({
-      title: 'Create folder',
+      title: t('file.createFolder'),
       copy: context.normalizedParentDir
-        ? 'Add a new folder inside the selected folder.'
-        : 'Add a new folder to organize notes and diagrams.',
-      label: `Folder ${context.inputLabelSuffix}`,
+        ? t('file.addANewFolderInsideTheSelectedFolder')
+        : t('file.addANewFolderToOrganizeNotesAndDiagrams'),
+      label: context.normalizedParentDir ? t('file.folderNameOrPath') : t('file.folderPath'),
       hint: context.hintPrefix,
       note: context.note,
       placeholder: context.normalizedParentDir ? 'archive' : 'notes/archive',
-      submitLabel: 'Create folder',
-      emptyMessage: 'Folder path is required',
+      submitLabel: t('file.createFolder'),
+      emptyMessage: t('file.folderPathIsRequired'),
       onSubmit: (value) => this.createDirectory(composeVaultChildPath(context.normalizedParentDir, value)),
     });
   }
@@ -952,23 +952,23 @@ export class FileActionController {
   handleNewCanvas({ parentDir = '' } = {}) {
     const context = this.getCreateContext(parentDir);
     this.openActionDialog({
-      title: 'Create canvas',
-      copy: 'Create a canvas for connected notes, files, links, and groups.',
-      label: `Canvas ${context.inputLabelSuffix}`,
-      hint: `${context.hintPrefix} ".canvas" is added automatically.`,
+      title: t('file.createCanvas'),
+      copy: t('file.createACanvasForConnectedNotesFilesLinksAnd'),
+      label: context.normalizedParentDir ? t('file.canvasNameOrPath') : t('file.canvasPath'),
+      hint: t('file.prefixCanvasIsAddedAutomatically', { prefix: context.hintPrefix }),
       note: context.note,
       placeholder: context.normalizedParentDir ? 'ideas' : 'diagrams/ideas',
-      submitLabel: 'Create canvas',
-      emptyMessage: 'Canvas path is required',
+      submitLabel: t('file.createCanvas'),
+      emptyMessage: t('file.canvasPathIsRequired'),
       onSubmit: (value) => {
         const normalizedPath = normalizeVaultPathInput(value);
         if (!normalizedPath) {
-          this.showToast('Canvas path is required');
+          this.showToast(t('file.canvasPathIsRequired'));
           return false;
         }
         const filePath = ensureVaultExtension(composeVaultChildPath(context.normalizedParentDir, normalizedPath), '.canvas');
         return this.createVaultFile(filePath, '{"nodes":[],"edges":[]}\n', {
-          errorMessage: 'Failed to create canvas',
+          errorMessage: t('file.failedToCreateCanvas'),
           openAfterCreate: true,
         });
       },
@@ -979,26 +979,26 @@ export class FileActionController {
     const context = this.getCreateContext(parentDir);
 
     this.openActionDialog({
-      title: 'Create Excalidraw drawing',
+      title: t('file.createExcalidrawDrawing'),
       copy: context.normalizedParentDir
-        ? 'Start a new drawing inside the selected folder.'
-        : 'Start a new drawing file in the vault.',
-      label: `Drawing ${context.inputLabelSuffix}`,
-      hint: `${context.hintPrefix} ".excalidraw" is added automatically.`,
+        ? t('file.startANewDrawingInsideTheSelectedFolder')
+        : t('file.startANewDrawingFileInTheVault'),
+      label: context.normalizedParentDir ? t('file.drawingNameOrPath') : t('file.drawingPath'),
+      hint: t('file.prefixExcalidrawIsAddedAutomatically', { prefix: context.hintPrefix }),
       note: context.note,
       placeholder: context.normalizedParentDir ? 'architecture' : 'diagrams/architecture',
-      submitLabel: 'Create drawing',
-      emptyMessage: 'Drawing path is required',
+      submitLabel: t('file.createDrawing'),
+      emptyMessage: t('file.drawingPathIsRequired'),
       onSubmit: (value) => {
         const normalizedPath = normalizeVaultPathInput(value);
         if (!normalizedPath) {
-          this.showToast('Drawing path is required');
+          this.showToast(t('file.drawingPathIsRequired'));
           return false;
         }
 
         const filePath = ensureVaultExtension(composeVaultChildPath(context.normalizedParentDir, normalizedPath), '.excalidraw');
         return this.createVaultFile(filePath, createEmptyExcalidrawScene(), {
-          errorMessage: 'Failed to create drawing',
+          errorMessage: t('file.failedToCreateDrawing'),
           openAfterCreate: true,
         });
       },
@@ -1009,26 +1009,26 @@ export class FileActionController {
     const context = this.getCreateContext(parentDir);
 
     this.openActionDialog({
-      title: 'Create Mermaid diagram',
+      title: t('file.createMermaidDiagram'),
       copy: context.normalizedParentDir
-        ? 'Create a new `.mmd` or `.mermaid` file inside the selected folder.'
-        : 'Create a new `.mmd` or `.mermaid` file with starter diagram content.',
-      label: `Diagram ${context.inputLabelSuffix}`,
-      hint: `${context.hintPrefix} ".mmd" is added automatically unless you enter ".mermaid".`,
+        ? t('file.createANewMmdOrMermaidFileInsideTheSelected')
+        : t('file.createANewMmdOrMermaidFileWithStarterDiagram'),
+      label: context.normalizedParentDir ? t('file.diagramNameOrPath') : t('file.diagramPath'),
+      hint: t('file.prefixMmdIsAddedAutomaticallyUnlessYouEnter', { prefix: context.hintPrefix }),
       note: context.note,
       placeholder: context.normalizedParentDir ? 'flow' : 'diagrams/flow',
-      submitLabel: 'Create diagram',
-      emptyMessage: 'Diagram path is required',
+      submitLabel: t('file.createDiagram'),
+      emptyMessage: t('file.diagramPathIsRequired'),
       onSubmit: (value) => {
         const normalizedPath = normalizeVaultPathInput(value);
         if (!normalizedPath) {
-          this.showToast('Diagram path is required');
+          this.showToast(t('file.diagramPathIsRequired'));
           return false;
         }
 
         const starter = createMermaidStarter(composeVaultChildPath(context.normalizedParentDir, normalizedPath));
         return this.createVaultFile(starter.path, starter.content, {
-          errorMessage: 'Failed to create Mermaid diagram',
+          errorMessage: t('file.failedToCreateMermaidDiagram'),
           openAfterCreate: true,
         });
       },
@@ -1039,26 +1039,26 @@ export class FileActionController {
     const context = this.getCreateContext(parentDir);
 
     this.openActionDialog({
-      title: 'Create draw.io diagram',
+      title: t('file.createDrawIoDiagram'),
       copy: context.normalizedParentDir
-        ? 'Create a new `.drawio` diagram inside the selected folder.'
-        : 'Create a new `.drawio` diagram with a native starter document.',
-      label: `Diagram ${context.inputLabelSuffix}`,
-      hint: `${context.hintPrefix} ".drawio" is added automatically.`,
+        ? t('file.createANewDrawioDiagramInsideTheSelectedFolder')
+        : t('file.createANewDrawioDiagramWithANativeStarter'),
+      label: context.normalizedParentDir ? t('file.diagramNameOrPath') : t('file.diagramPath'),
+      hint: t('file.prefixDrawioIsAddedAutomatically', { prefix: context.hintPrefix }),
       note: context.note,
       placeholder: context.normalizedParentDir ? 'architecture' : 'diagrams/architecture',
-      submitLabel: 'Create diagram',
-      emptyMessage: 'Diagram path is required',
+      submitLabel: t('file.createDiagram'),
+      emptyMessage: t('file.diagramPathIsRequired'),
       onSubmit: (value) => {
         const normalizedPath = normalizeVaultPathInput(value);
         if (!normalizedPath) {
-          this.showToast('Diagram path is required');
+          this.showToast(t('file.diagramPathIsRequired'));
           return false;
         }
 
         const starter = createDrawioStarter(composeVaultChildPath(context.normalizedParentDir, normalizedPath));
         return this.createVaultFile(starter.path, starter.content, {
-          errorMessage: 'Failed to create draw.io diagram',
+          errorMessage: t('file.failedToCreateDrawIoDiagram'),
           openAfterCreate: true,
         });
       },
@@ -1069,26 +1069,26 @@ export class FileActionController {
     const context = this.getCreateContext(parentDir);
 
     this.openActionDialog({
-      title: 'Create PlantUML diagram',
+      title: t('file.createPlantumlDiagram'),
       copy: context.normalizedParentDir
-        ? 'Create a new `.puml` or `.plantuml` file inside the selected folder.'
-        : 'Create a new `.puml` or `.plantuml` file with starter diagram content.',
-      label: `Diagram ${context.inputLabelSuffix}`,
-      hint: `${context.hintPrefix} ".puml" is added automatically unless you enter ".plantuml".`,
+        ? t('file.createANewPumlOrPlantumlFileInsideTheSelected')
+        : t('file.createANewPumlOrPlantumlFileWithStarterDiagram'),
+      label: context.normalizedParentDir ? t('file.diagramNameOrPath') : t('file.diagramPath'),
+      hint: t('file.prefixPumlIsAddedAutomaticallyUnlessYouEnter', { prefix: context.hintPrefix }),
       note: context.note,
       placeholder: context.normalizedParentDir ? 'sequence-flow' : 'diagrams/sequence-flow',
-      submitLabel: 'Create diagram',
-      emptyMessage: 'Diagram path is required',
+      submitLabel: t('file.createDiagram'),
+      emptyMessage: t('file.diagramPathIsRequired'),
       onSubmit: (value) => {
         const normalizedPath = normalizeVaultPathInput(value);
         if (!normalizedPath) {
-          this.showToast('Diagram path is required');
+          this.showToast(t('file.diagramPathIsRequired'));
           return false;
         }
 
         const starter = createPlantUmlStarter(composeVaultChildPath(context.normalizedParentDir, normalizedPath));
         return this.createVaultFile(starter.path, starter.content, {
-          errorMessage: 'Failed to create PlantUML diagram',
+          errorMessage: t('file.failedToCreatePlantumlDiagram'),
           openAfterCreate: true,
         });
       },
@@ -1099,26 +1099,26 @@ export class FileActionController {
     const context = this.getCreateContext(parentDir);
 
     this.openActionDialog({
-      title: 'Create Structurizr workspace',
+      title: t('file.createStructurizrWorkspace'),
       copy: context.normalizedParentDir
-        ? 'Create a collaborative C4 workspace inside the selected folder.'
-        : 'Create a collaborative C4 workspace in the vault.',
-      label: `Workspace ${context.inputLabelSuffix}`,
-      hint: `${context.hintPrefix} ".dsl" is added automatically. workspace.dsl is conventional; any workspace .dsl file can render.`,
+        ? t('file.createACollaborativeC4WorkspaceInsideTheSelected')
+        : t('file.createACollaborativeC4WorkspaceInTheVault'),
+      label: context.normalizedParentDir ? t('file.workspaceNameOrPath') : t('file.workspacePath'),
+      hint: t('file.prefixDslIsAddedAutomaticallyWorkspaceDslIs', { prefix: context.hintPrefix }),
       note: context.note,
       placeholder: 'workspace',
-      submitLabel: 'Create workspace',
-      emptyMessage: 'Workspace path is required',
+      submitLabel: t('file.createWorkspace'),
+      emptyMessage: t('file.workspacePathIsRequired'),
       onSubmit: (value) => {
         const normalizedPath = normalizeVaultPathInput(value);
         if (!normalizedPath) {
-          this.showToast('Workspace path is required');
+          this.showToast(t('file.workspacePathIsRequired'));
           return false;
         }
 
         const starter = createStructurizrStarter(composeVaultChildPath(context.normalizedParentDir, normalizedPath));
         return this.createVaultFile(starter.path, starter.content, {
-          errorMessage: 'Failed to create Structurizr workspace',
+          errorMessage: t('file.failedToCreateStructurizrWorkspace'),
           openAfterCreate: true,
         });
       },
@@ -1129,36 +1129,36 @@ export class FileActionController {
     const extension = getVaultFileExtension(filePath) || '.md';
 
     this.openActionDialog({
-      title: 'Rename or move file',
-      copy: 'Update the relative path without changing the file type.',
-      label: 'Path',
-      hint: `Use "/" to move the file into another folder. ${extension} is kept automatically.`,
+      title: t('file.renameOrMoveFile'),
+      copy: t('file.updateTheRelativePathWithoutChangingTheFileType'),
+      label: t('common.path'),
+      hint: t('file.useToMoveTheFileIntoAnotherFolderExtensionIsKept', { extension }),
       value: filePath,
-      submitLabel: 'Save file path',
-      emptyMessage: 'File path is required',
+      submitLabel: t('file.saveFilePath'),
+      emptyMessage: t('file.filePathIsRequired'),
       onSubmit: (value) => this.renameVaultFile(filePath, value, extension),
     });
   }
 
   handleRenameDirectory(directoryPath) {
     this.openActionDialog({
-      title: 'Rename or move folder',
-      copy: 'Update the relative path for this folder and everything inside it.',
-      label: 'Path',
-      hint: 'Use "/" to move the folder into another location in the vault.',
+      title: t('file.renameOrMoveFolder'),
+      copy: t('file.updateTheRelativePathForThisFolderAndEverything'),
+      label: t('common.path'),
+      hint: t('file.useToMoveTheFolderIntoAnotherLocationInTheVault'),
       value: directoryPath,
-      submitLabel: 'Save folder path',
-      emptyMessage: 'Folder path is required',
+      submitLabel: t('file.saveFolderPath'),
+      emptyMessage: t('file.folderPathIsRequired'),
       onSubmit: (value) => this.renameDirectory(directoryPath, value),
     });
   }
 
   handleDelete(filePath) {
     this.openActionDialog({
-      title: 'Delete file',
-      copy: 'This permanently removes the file from the vault.',
+      title: t('file.deleteFile'),
+      copy: t('file.thisPermanentlyRemovesTheFileFromTheVault'),
       note: filePath,
-      submitLabel: 'Delete file',
+      submitLabel: t('file.deleteFile'),
       destructive: true,
       requiresInput: false,
       onSubmit: () => this.deleteVaultFile(filePath),
@@ -1169,14 +1169,17 @@ export class FileActionController {
     const { directoryCount, fileCount } = this.state.getDirectoryDescendantSummary(directoryPath);
     const hasDescendants = directoryCount > 0 || fileCount > 0;
     const summary = hasDescendants
-      ? `This will permanently remove ${formatCount(fileCount, 'file', 'files')} and ${formatCount(directoryCount, 'nested folder', 'nested folders')} inside this folder.`
-      : 'This permanently removes the empty folder from the vault.';
+      ? t('file.thisWillPermanentlyRemoveFilesAndFoldersInside', {
+        files: formatCount(fileCount, t('file.file'), t('file.files')),
+        folders: formatCount(directoryCount, t('file.nestedFolder'), t('file.nestedFolders')),
+      })
+      : t('file.thisPermanentlyRemovesTheEmptyFolderFromTheVault');
 
     this.openActionDialog({
-      title: hasDescendants ? 'Delete folder and contents' : 'Delete folder',
+      title: hasDescendants ? t('file.deleteFolderAndContents') : t('file.deleteFolder'),
       copy: summary,
       note: directoryPath,
-      submitLabel: hasDescendants ? 'Delete folder and contents' : 'Delete folder',
+      submitLabel: hasDescendants ? t('file.deleteFolderAndContents') : t('file.deleteFolder'),
       destructive: true,
       requiresInput: false,
       onSubmit: () => this.deleteDirectory(directoryPath, { recursive: hasDescendants }),

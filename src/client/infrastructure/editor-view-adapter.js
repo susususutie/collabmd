@@ -1,3 +1,4 @@
+import { t } from '../i18n/index.js';
 import { autocompletion, closeBrackets, closeBracketsKeymap } from '@codemirror/autocomplete';
 import {
   defaultKeymap,
@@ -497,6 +498,25 @@ export class EditorViewAdapter {
       foldGutter(),
       drawSelection(),
       EditorState.allowMultipleSelections.of(true),
+      EditorState.phrases.of({
+        Find: t('common.find'),
+        Replace: t('common.replace'),
+        next: t('editor.next'),
+        previous: t('editor.previous'),
+        all: t('editor.all'),
+        'match case': t('editor.matchCase'),
+        'by word': t('editor.byWord'),
+        regexp: t('editor.regexp'),
+        replace: t('editor.replace'),
+        'replace all': t('editor.replaceAll'),
+        close: t('editor.close'),
+        'current match': t('editor.currentMatch'),
+        'Go to line': t('editor.goToLine'),
+        go: t('editor.go'),
+        'on line': t('editor.onLine'),
+        'replaced $ matches': t('editor.replacedMatches'),
+        'replaced match on line $': t('editor.replacedMatchOnLine'),
+      }),
       indentOnInput(),
       syntaxHighlighting(defaultHighlightStyle, { fallback: true }),
       bracketMatching({ renderMatch: renderBracketMatch }),
@@ -523,7 +543,7 @@ export class EditorViewAdapter {
         indentWithTab,
       ]),
       EditorView.contentAttributes.of({
-        'aria-label': 'Markdown editor',
+        'aria-label': t('editor.markdownEditor'),
       }),
       createLanguageExtension(filePath),
       this.themeCompartment.of(createEditorTheme(this.initialTheme)),
@@ -1226,7 +1246,7 @@ export class EditorViewAdapter {
     const position = state.selection.main.head;
     const line = state.doc.lineAt(position);
     const column = position - line.from + 1;
-    this.lineInfoElement.textContent = `Ln ${line.number}, Col ${column}`;
+    this.lineInfoElement.textContent = t('editor.lnLineColColumn', { line: line.number, column });
   }
 
   emitViewportChange() {

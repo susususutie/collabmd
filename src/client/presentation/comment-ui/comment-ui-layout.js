@@ -12,6 +12,7 @@ import {
   serializeGroupKeys,
   toRelativeRect,
 } from './comment-ui-shared.js';
+import { t } from '../../i18n/index.js';
 
 function setInteractionClasses(element, isActive, isHovered) {
   element.classList.toggle('is-active', isActive);
@@ -133,11 +134,11 @@ function renderEditorLayer(groups = this.getThreadGroups()) {
     const isActive = this.activeCard?.groupKey === group.key;
     const isHovered = this.hoveredEditorGroupKeys.includes(group.key);
     setInteractionClasses(button, isActive, isHovered);
-    button.setAttribute('aria-label', `${group.threads.length} comment thread${group.threads.length === 1 ? '' : 's'}`);
+    button.setAttribute('aria-label', t('comment.commentThread', { count: group.threads.length }));
     const top = Math.max(relativeRect.top, 8);
     button.style.top = `${top}px`;
     button.style.left = `${Math.max(containerRect.width - 36, 8)}px`;
-    button.title = `${group.threads.length} comment${group.threads.length === 1 ? '' : 's'}`;
+    button.title = t('comment.comment', { count: group.threads.length });
     visibleGroupKeys.add(group.key);
     occupiedTops.push(top);
   });
@@ -180,7 +181,7 @@ function renderEditorLayer(groups = this.getThreadGroups()) {
     button = document.createElement('button');
     button.type = 'button';
     button.className = 'ui-selection-pill ui-selection-pill--comment comment-selection-chip';
-    button.textContent = 'Comment';
+    button.textContent = t('common.comment');
     button.addEventListener('pointerdown', (event) => {
       event.preventDefault();
       event.stopPropagation();
@@ -228,8 +229,8 @@ function syncPreviewSelectionButton(previewRect) {
     button = document.createElement('button');
     button.type = 'button';
     button.className = 'ui-chip-button ui-chip-button--comment comment-preview-selection-chip';
-    button.textContent = 'Comment';
-    button.setAttribute('aria-label', 'Comment on selected preview text');
+    button.textContent = t('common.comment');
+    button.setAttribute('aria-label', t('comment.commentOnSelectedPreviewText'));
     button.addEventListener('pointerdown', (event) => {
       event.preventDefault();
       event.stopPropagation();

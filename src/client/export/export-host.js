@@ -1,3 +1,4 @@
+import { t } from '../i18n/index.js';
 import { resolveAppUrl } from '../infrastructure/runtime-config.js';
 
 const EXPORT_PAGE_SOURCE = 'collabmd-export-page';
@@ -108,7 +109,7 @@ export function initializeExportBridge({
     if (payload.type === 'ready') {
       if (pendingJob.window?.closed) {
         finishPendingJob(jobId, {
-          message: 'Export window was closed before the export completed',
+          message: t('export.exportWindowWasClosedBeforeTheExportCompleted'),
           notifyError: true,
         });
         return;
@@ -118,7 +119,7 @@ export function initializeExportBridge({
         pendingJob.window?.postMessage(pendingJob.payload, window.location.origin);
       } catch (error) {
         finishPendingJob(jobId, {
-          message: error instanceof Error ? error.message : 'Failed to send export data',
+          message: error instanceof Error ? error.message : t('export.failedToSendExportData'),
           notifyError: true,
         });
       }
@@ -140,7 +141,7 @@ async function startExport(payload) {
   const jobId = createJobId();
   const exportWindow = globalThis.open('', jobId);
   if (!exportWindow) {
-    throw new Error('Export popup was blocked');
+    throw new Error(t('export.exportPopupWasBlocked'));
   }
 
   pendingJobs.set(jobId, {
@@ -150,14 +151,14 @@ async function startExport(payload) {
       }
 
       finishPendingJob(jobId, {
-        message: 'Export window was closed before the export completed',
+        message: t('export.exportWindowWasClosedBeforeTheExportCompleted'),
         notifyError: true,
       });
     }, EXPORT_JOB_CLOSE_POLL_MS),
     payload: createBootstrapPayload({ ...payload, jobId }),
     timeoutId: window.setTimeout(() => {
       finishPendingJob(jobId, {
-        message: 'Export timed out before it completed',
+        message: t('export.exportTimedOutBeforeItCompleted'),
         notifyError: true,
       });
     }, EXPORT_JOB_TIMEOUT_MS),
@@ -178,7 +179,7 @@ export async function exportDirectory({
 } = {}) {
   const normalizedDirectoryPath = String(directoryPath ?? '').replace(/\\/gu, '/').replace(/^\/+|\/+$/gu, '').trim();
   if (!normalizedDirectoryPath) {
-    throw new Error('No folder was selected');
+    throw new Error(t('export.noFolderWasSelected'));
   }
 
   return startExport({
@@ -199,7 +200,7 @@ export async function exportDocument({
 } = {}) {
   const normalizedFilePath = String(filePath ?? '').trim();
   if (!normalizedFilePath) {
-    throw new Error('No markdown note is open');
+    throw new Error(t('export.noMarkdownNoteIsOpen'));
   }
 
   return startExport({

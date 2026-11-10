@@ -1,9 +1,11 @@
+import { t } from '../i18n/index.js';
+
 export const DEFAULT_SEARCH_DEBOUNCE_MS = 300;
 const TEXT_RESULT_LIMIT = 50;
 
 export function formatMatchCount(count = 0, { truncated = false } = {}) {
   const normalized = Number(count) || 0;
-  return `${normalized}${truncated ? '+' : ''} ${normalized === 1 ? 'match' : 'matches'}`;
+  return `${normalized}${truncated ? '+' : ''} ${normalized === 1 ? t('search.match') : t('search.matches')}`;
 }
 
 export function flattenTextResults(payload = {}) {
@@ -54,21 +56,21 @@ export class QuickSwitcherTextSearchRunner {
     this.abort();
 
     if (!searchConfig.available) {
-      onState?.('Global text search requires ripgrep on the server.');
+      onState?.(t('search.globalTextSearchRequiresRipgrepOnTheServer'));
       return;
     }
 
     if (!searchText) {
-      onState?.('Global text search is unavailable.');
+      onState?.(t('search.globalTextSearchIsUnavailable'));
       return;
     }
 
     if (query.length < minQueryLength) {
-      onState?.(`Type at least ${minQueryLength} characters to search file text.`);
+      onState?.(t('search.typeAtLeastCountCharactersToSearchFileText', { count: minQueryLength }));
       return;
     }
 
-    onState?.('Searching...');
+    onState?.(t('search.searching'));
     this.timer = setTimeout(() => {
       void this.run({
         isActive,
@@ -111,7 +113,7 @@ export class QuickSwitcherTextSearchRunner {
         return;
       }
 
-      onState?.(error?.body?.error || error?.message || 'Failed to search file text.');
+      onState?.(error?.body?.error || error?.message || t('search.failedToSearchFileText'));
     } finally {
       if (this.controller === controller) {
         this.controller = null;

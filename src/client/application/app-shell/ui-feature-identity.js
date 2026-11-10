@@ -1,4 +1,5 @@
 import { USER_NAME_MAX_LENGTH, normalizeUserName } from '../../domain/room.js';
+import { t } from '../../i18n/index.js';
 
 /**
  * @typedef {object} UiIdentityContext
@@ -46,18 +47,18 @@ function openDisplayNameDialog({ mode = 'edit' } = {}) {
   const isOnboarding = mode === 'onboarding';
   this._displayNameDialogMode = mode;
   if (title) {
-    title.textContent = isOnboarding ? 'Choose your display name' : 'Update display name';
+    title.textContent = isOnboarding ? t('app.chooseYourDisplayName') : t('app.updateDisplayName');
   }
   if (copy) {
     copy.textContent = isOnboarding
-      ? 'Pick a name collaborators will see. You can skip for now and continue as a guest.'
-      : 'Your name will be visible to everyone editing this vault.';
+      ? t('app.pickANameCollaboratorsWillSeeYouCanSkipForNowAnd')
+      : t('app.yourNameWillBeVisibleToEveryoneEditingThisVault');
   }
   if (cancel) {
-    cancel.textContent = isOnboarding ? 'Skip for now' : 'Cancel';
+    cancel.textContent = isOnboarding ? t('app.skipForNow') : t('common.cancel');
   }
   if (submit) {
-    submit.textContent = isOnboarding ? 'Continue' : 'Save name';
+    submit.textContent = isOnboarding ? t('common.continue') : t('app.saveName');
   }
 
   input.value = isOnboarding ? '' : this.getCurrentUserName();
@@ -115,7 +116,7 @@ function handleDisplayNameSubmit() {
     : normalizeUserName(input.value);
   if (!normalizedName) {
     input.focus();
-    this.toastController.show(`Name must be 1-${USER_NAME_MAX_LENGTH} characters`);
+    this.toastController.show(t('app.nameMustBe1MaxCharacters', { max: USER_NAME_MAX_LENGTH }));
     return;
   }
 
@@ -153,12 +154,12 @@ function syncCurrentUserName() {
   const el = this.elements.currentUserName;
   if (!el) return;
   const name = this.getCurrentUserName();
-  el.textContent = name || 'Set name';
+  el.textContent = name || t('app.setName');
   el.classList.toggle('has-name', Boolean(name));
   if (!this.isIdentityManagedByAuth()) {
     this.elements.editNameButton?.setAttribute(
       'aria-label',
-      `${name || 'Set name'}. Change display name`,
+      t('app.nameChangeDisplayName', { name: name || t('app.setName') }),
     );
   }
 }

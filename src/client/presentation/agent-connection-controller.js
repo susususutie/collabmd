@@ -1,4 +1,5 @@
 import { escapeHtml } from '../domain/vault-utils.js';
+import { t } from '../i18n/index.js';
 
 function createAgentSetup({ authRequired, endpoint }) {
   return [
@@ -13,7 +14,7 @@ function createAgentTokenExport(token) {
 }
 
 function formatDate(value) {
-  return value ? new Date(value).toLocaleString() : 'Never';
+  return value ? new Date(value).toLocaleString() : t('agent.never');
 }
 
 export class AgentConnectionController {
@@ -47,14 +48,14 @@ export class AgentConnectionController {
   async open() {
     this.closeToolbarMenu?.();
     this.dialog?.showModal?.();
-    this.renderStatus('Loading Agent Access…');
+    this.renderStatus(t('agent.loadingAgentAccess'));
     try {
       const connections = this.config.managed
         ? (await this.apiClient.listConnections()).connections
         : [];
       this.renderOverview(connections);
     } catch (error) {
-      this.renderStatus(error.message || 'Failed to load Agent Access', { error: true });
+      this.renderStatus(error.message || t('agent.failedToLoadAgentAccess'), { error: true });
     }
   }
 
@@ -70,33 +71,33 @@ export class AgentConnectionController {
           <div>
             <strong>${escapeHtml(connection.label)}</strong>
             <span>${escapeHtml(connection.scopes.join(', '))}</span>
-            <small>Expires ${escapeHtml(formatDate(connection.expiresAt))}</small>
+            <small>${t('agent.expiresDate', { date: formatDate(connection.expiresAt) })}</small>
           </div>
-          <button class="ui-button ui-button--secondary ui-button--compact" type="button" data-agent-revoke="${escapeHtml(connection.id)}">Revoke</button>
+          <button class="ui-button ui-button--secondary ui-button--compact" type="button" data-agent-revoke="${escapeHtml(connection.id)}">${t('agent.revoke')}</button>
         </article>
       `).join('')
       : `
         <div class="agent-connection-empty">
-          <strong>Connect your first agent</strong>
-          <p>Choose its access, create a secure token, then copy the setup into your agent.</p>
+          <strong>${t('agent.connectYourFirstAgent')}</strong>
+          <p>${t('agent.chooseItsAccessCreateASecureTokenThenCopyThe')}</p>
         </div>
       `;
     const management = this.config.managed
-      ? `<button class="ui-button ui-button--primary" type="button" data-agent-create>${connections.length > 0 ? 'New connection' : 'Start setup'}</button>`
+      ? `<button class="ui-button ui-button--primary" type="button" data-agent-create>${connections.length > 0 ? t('agent.newConnection') : t('agent.startSetup')}</button>`
       : `
         <section class="agent-connection-empty">
-          <strong>No authentication required</strong>
+          <strong>${t('agent.noAuthenticationRequired')}</strong>
           <ol class="agent-connection-steps">
-            <li>Copy the connection details below into your agent.</li>
-            <li>Add this CollabMD MCP endpoint and restart the agent.</li>
-            <li>Anyone who can reach this no-auth workspace can use its read and edit tools.</li>
+            <li>${t('agent.copyTheConnectionDetailsBelowIntoYourAgent')}</li>
+            <li>${t('agent.addThisCollabmdMcpEndpointAndRestartTheAgent')}</li>
+            <li>${t('agent.anyoneWhoCanReachThisNoAuthWorkspaceCanUseIts')}</li>
           </ol>
         </section>
       `;
     const connectionsSection = this.config.managed
       ? `
         <section class="agent-connection-section">
-          <h3>Connections</h3>
+          <h3>${t('agent.connections')}</h3>
           <div class="agent-connection-list">${connectionMarkup}</div>
         </section>
       `
@@ -105,13 +106,13 @@ export class AgentConnectionController {
       ${connectionsSection}
       ${this.config.managed ? '' : management}
       <details class="agent-connection-details">
-        <summary>Connection details</summary>
+        <summary>${t('agent.connectionDetails')}</summary>
         <code>${escapeHtml(this.endpoint)}</code>
-        <p>Streamable HTTP · ${this.config.authRequired ? 'Bearer token' : 'No authentication'} · Read and edit tools</p>
+        <p>${t('agent.streamableHttpAuthReadAndEditTools', { auth: this.config.authRequired ? t('agent.bearerToken') : t('agent.noAuthentication') })}</p>
       </details>
       <div class="agent-connection-actions">
-        ${this.config.managed ? management : '<button class="ui-button ui-button--primary" type="button" data-agent-copy-setup>Copy connection details</button>'}
-        <button class="ui-button ui-button--ghost" type="button" data-agent-close>Close</button>
+        ${this.config.managed ? management : `<button class="ui-button ui-button--primary" type="button" data-agent-copy-setup>${t('agent.copyConnectionDetails')}</button>`}
+        <button class="ui-button ui-button--ghost" type="button" data-agent-close>${t('common.close')}</button>
       </div>
       <p class="agent-connection-live" role="status" aria-live="polite"></p>
     `;
@@ -121,23 +122,23 @@ export class AgentConnectionController {
     this.content.innerHTML = `
       <form class="agent-connection-form" data-agent-create-form>
         <header class="agent-connection-step-header">
-          <span>Step 1 of 2</span>
-          <h3>Choose access</h3>
-          <p>You can revoke this connection at any time.</p>
+          <span>${t('agent.step1Of2')}</span>
+          <h3>${t('agent.chooseAccess')}</h3>
+          <p>${t('agent.youCanRevokeThisConnectionAtAnyTime')}</p>
         </header>
         <label class="app-dialog-field">
-          <span class="app-dialog-label">Connection name</span>
+          <span class="app-dialog-label">${t('agent.connectionName')}</span>
           <input class="ui-input" name="label" maxlength="80" value="My Agent" required>
         </label>
         <fieldset class="agent-connection-scopes">
-          <legend>Access</legend>
-          <label><input type="checkbox" checked disabled> Read Vault Content</label>
-          <label><input type="checkbox" name="edit" checked> Edit and create supported text files</label>
+          <legend>${t('agent.access')}</legend>
+          <label><input type="checkbox" checked disabled> ${t('agent.readVaultContent')}</label>
+          <label><input type="checkbox" name="edit" checked> ${t('agent.editAndCreateSupportedTextFiles')}</label>
         </fieldset>
-        <p class="agent-connection-note">Token expires after 30 days and can be revoked here. Delete, rename, Git, and publish are not exposed.</p>
+        <p class="agent-connection-note">${t('agent.tokenExpiresAfter30DaysAndCanBeRevokedHereDelete')}</p>
         <div class="agent-connection-actions">
-          <button class="ui-button ui-button--secondary" type="button" data-agent-back>Back</button>
-          <button class="ui-button ui-button--primary" type="submit">Create secure token</button>
+          <button class="ui-button ui-button--secondary" type="button" data-agent-back>${t('common.back')}</button>
+          <button class="ui-button ui-button--primary" type="submit">${t('agent.createSecureToken')}</button>
         </div>
         <p class="agent-connection-live" role="status" aria-live="polite"></p>
       </form>
@@ -152,27 +153,27 @@ export class AgentConnectionController {
     });
     this.content.innerHTML = `
       <header class="agent-connection-step-header">
-        <span>Step 2 of 2</span>
-        <h3>Finish setup in your MCP client</h3>
-        <p class="agent-connection-warning">The token is shown once. Finish these steps before closing.</p>
+        <span>${t('agent.step2Of2')}</span>
+        <h3>${t('agent.finishSetupInYourMcpClient')}</h3>
+        <p class="agent-connection-warning">${t('agent.theTokenIsShownOnceFinishTheseStepsBeforeClosing')}</p>
       </header>
       <ol class="agent-connection-steps agent-connection-steps--setup">
         <li>
-          <div><strong>Save the access token</strong><span>Run the copied command in the terminal that starts your MCP client.</span></div>
-          <button class="ui-button ui-button--primary" type="button" data-agent-copy-token>Copy token command</button>
+          <div><strong>${t('agent.saveTheAccessToken')}</strong><span>${t('agent.runTheCopiedCommandInTheTerminalThatStartsYour')}</span></div>
+          <button class="ui-button ui-button--primary" type="button" data-agent-copy-token>${t('agent.copyTokenCommand')}</button>
         </li>
         <li>
-          <div><strong>Add this workspace</strong><span>Paste the setup into your MCP client.</span></div>
-          <button class="ui-button ui-button--secondary" type="button" data-agent-copy-setup>Copy MCP setup</button>
+          <div><strong>${t('agent.addThisWorkspace')}</strong><span>${t('agent.pasteTheSetupIntoYourMcpClient')}</span></div>
+          <button class="ui-button ui-button--secondary" type="button" data-agent-copy-setup>${t('agent.copyMcpSetup')}</button>
         </li>
       </ol>
       <details class="agent-connection-details">
-        <summary>View manual setup</summary>
-        <input class="ui-input agent-connection-token" value="${escapeHtml(token)}" readonly aria-label="Agent Connection token">
+        <summary>${t('agent.viewManualSetup')}</summary>
+        <input class="ui-input agent-connection-token" value="${escapeHtml(token)}" readonly aria-label="${t('agent.agentConnectionToken')}">
         <pre><code>${escapeHtml(setup)}</code></pre>
       </details>
       <div class="agent-connection-actions">
-        <button class="ui-button ui-button--primary" type="button" data-agent-close>Done</button>
+        <button class="ui-button ui-button--primary" type="button" data-agent-close>${t('agent.done')}</button>
       </div>
       <p class="agent-connection-live" role="status" aria-live="polite"></p>
     `;
@@ -211,24 +212,24 @@ export class AgentConnectionController {
       return;
     }
     if (target.dataset.agentCopyToken != null) {
-      await this.copy(createAgentTokenExport(this.secretToken), 'Token command copied — run it in the agent terminal.');
+      await this.copy(createAgentTokenExport(this.secretToken), t('agent.tokenCommandCopiedRunItInTheAgentTerminal'));
       return;
     }
     if (target.dataset.agentCopySetup != null) {
       await this.copy(createAgentSetup({
         authRequired: this.config.authRequired,
         endpoint: this.endpoint,
-      }), 'Setup copied — add it to your MCP client.');
+      }), t('agent.setupCopiedAddItToYourMcpClient'));
       return;
     }
     if (target.dataset.agentRevoke) {
-      if (!window.confirm('Revoke this Agent Connection?')) return;
+      if (!window.confirm(t('agent.revokeThisAgentConnection'))) return;
       try {
         await this.apiClient.revokeConnection(target.dataset.agentRevoke);
         await this.refresh();
-        this.setLiveMessage('Agent Connection revoked');
+        this.setLiveMessage(t('agent.agentConnectionRevoked'));
       } catch (error) {
-        this.toastController?.show(error.message || 'Failed to revoke Agent Connection');
+        this.toastController?.show(error.message || t('agent.failedToRevokeAgentConnection'));
       }
     }
   }
@@ -248,7 +249,7 @@ export class AgentConnectionController {
       });
       this.renderToken(result);
     } catch (error) {
-      this.setLiveMessage(error.message || 'Failed to create Agent Connection');
+      this.setLiveMessage(error.message || t('agent.failedToCreateAgentConnection'));
       submit.disabled = false;
     }
   }

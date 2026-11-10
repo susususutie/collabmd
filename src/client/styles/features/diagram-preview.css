@@ -390,7 +390,7 @@ body.excalidraw-maximized-open .resizer {
 }
 
 .excalidraw-embed.is-loading::after {
-  content: 'Loading Excalidraw...';
+  content: var(--diagram-loading-label, 'Loading Excalidraw...');
   position: absolute;
   inset: 0;
   display: flex;

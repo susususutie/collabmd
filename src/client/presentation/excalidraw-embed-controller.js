@@ -1,3 +1,4 @@
+import { t } from '../i18n/index.js';
 import { setDiagramActionButtonIcon } from '../domain/diagram-action-icons.js';
 import { parseExcalidrawElementLink } from '../domain/excalidraw-element-link.js';
 import { reconcileEmbedEntries } from './excalidraw-embed-reconciler.js';
@@ -307,7 +308,7 @@ export class ExcalidrawEmbedController {
 
       const timeoutId = window.setTimeout(() => {
         const shouldDiscard = window.confirm(
-          'This diagram has not reconnected, so its latest queued changes may not be saved. Discard pending changes and leave?',
+          t('diagram.thisDiagramHasNotReconnectedSoItsLatestQueued'),
         );
         if (!shouldDiscard) {
           this._postMessageToEntry(entry, {
@@ -315,7 +316,7 @@ export class ExcalidrawEmbedController {
             type: 'cancel-disconnect',
             requestId,
           });
-          this.toastController?.show?.('Stayed on the diagram while it reconnects');
+          this.toastController?.show?.(t('diagram.stayedOnTheDiagramWhileItReconnects'));
           finish(false);
           return;
         }
@@ -652,7 +653,7 @@ export class ExcalidrawEmbedController {
 
     if ((entry.bootAttempts ?? 0) >= MAX_IFRAME_BOOT_ATTEMPTS) {
       this._clearEntryBootTimeout(entry);
-      this.toastController?.show(`Excalidraw embed timed out: ${entry.label}`);
+      this.toastController?.show(t('diagram.excalidrawEmbedTimedOutLabel', { label: entry.label }));
       return;
     }
 
@@ -740,7 +741,7 @@ export class ExcalidrawEmbedController {
     }
 
     if (entry.iframe) {
-      entry.iframe.title = `Excalidraw: ${entry.filePath}`;
+      entry.iframe.title = t('diagram.excalidrawPath', { path: entry.filePath });
     }
 
     if (entry.openButton) {
@@ -827,15 +828,15 @@ export class ExcalidrawEmbedController {
     const openBtn = document.createElement('button');
     openBtn.type = 'button';
     openBtn.className = 'excalidraw-embed-btn ui-preview-action ui-preview-action--icon-only';
-    openBtn.title = 'Edit in Excalidraw';
-    openBtn.setAttribute('aria-label', 'Edit in Excalidraw');
+    openBtn.title = t('diagram.editInExcalidraw');
+    openBtn.setAttribute('aria-label', t('diagram.editInExcalidraw'));
     setDiagramActionButtonIcon(openBtn, 'edit');
 
     const maxBtn = document.createElement('button');
     maxBtn.type = 'button';
     maxBtn.className = 'excalidraw-embed-btn ui-preview-action ui-preview-action--icon-only';
-    maxBtn.title = 'Maximize diagram';
-    maxBtn.setAttribute('aria-label', 'Maximize diagram');
+    maxBtn.title = t('diagram.maximizeDiagram');
+    maxBtn.setAttribute('aria-label', t('diagram.maximizeDiagram'));
     setDiagramActionButtonIcon(maxBtn, 'maximize');
 
     header.append(icon, label);
@@ -852,12 +853,12 @@ export class ExcalidrawEmbedController {
     // The controller already lazy-hydrates embeds near the viewport, so the
     // iframe should start loading immediately once it has been mounted.
     iframe.setAttribute('loading', 'eager');
-    iframe.title = `Excalidraw: ${entry.filePath}`;
+    iframe.title = t('diagram.excalidrawPath', { path: entry.filePath });
     iframe.style.height = `${DEFAULT_HEIGHT}px`;
 
     const resizer = document.createElement('div');
     resizer.className = 'excalidraw-embed-resizer';
-    resizer.title = 'Drag to resize';
+    resizer.title = t('diagram.dragToResize');
     const resizerCleanup = this._setupResizer(resizer, iframe, () => {
       this._syncEntryLayout(entry);
       this._requestPreviewViewportFit(entry);
@@ -870,8 +871,8 @@ export class ExcalidrawEmbedController {
 
     const syncMaximizeButtonState = () => {
       setDiagramActionButtonIcon(maxBtn, isMaximized ? 'restore' : 'maximize');
-      maxBtn.title = isMaximized ? 'Restore diagram size' : 'Maximize diagram';
-      maxBtn.setAttribute('aria-label', isMaximized ? 'Restore diagram size' : 'Maximize diagram');
+      maxBtn.title = isMaximized ? t('diagram.restoreDiagramSize') : t('diagram.maximizeDiagram');
+      maxBtn.setAttribute('aria-label', isMaximized ? t('diagram.restoreDiagramSize') : t('diagram.maximizeDiagram'));
     };
 
     const exitMaximize = () => {
@@ -1418,7 +1419,7 @@ export class ExcalidrawEmbedController {
 
     if (msg.type === 'disconnect-blocked') {
       entry.authorityState = msg.state || 'reconnecting-readonly';
-      this.toastController?.show?.('Waiting for the diagram to reconnect before leaving');
+      this.toastController?.show?.(t('diagram.waitingForTheDiagramToReconnectBeforeLeaving'));
       return;
     }
 

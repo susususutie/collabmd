@@ -1,4 +1,5 @@
 import { findFuzzyMatch } from '../domain/file-search.js';
+import { t } from '../i18n/index.js';
 
 export function renderVaultDashboard({ container, vaults, getVaultUrl, onSelect }) {
   container.removeAttribute('role');
@@ -14,20 +15,20 @@ export function renderVaultDashboard({ container, vaults, getVaultUrl, onSelect 
           </svg>
           <span class="sidebar-title">CollabMD</span>
         </div>
-        <h1 id="vaultDashboardTitle">Choose a vault</h1>
-        <p>Open a project to start collaborating.</p>
+        <h1 id="vaultDashboardTitle">${t('vault.chooseAVault')}</h1>
+        <p>${t('vault.openAProjectToStartCollaborating')}</p>
       </header>
       <div class="vault-dashboard-search">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5"></circle><path d="m16 16 4 4"></path></svg>
-        <input type="search" class="ui-input" aria-label="Find a vault" placeholder="Find a vault…">
+        <input type="search" class="ui-input" aria-label="${t('vault.findAVault')}" placeholder="${t('vault.findAVault2')}">
       </div>
       <div class="vault-dashboard-list-heading">
-        <h2>Your vaults</h2>
+        <h2>${t('vault.yourVaults')}</h2>
         <span class="ui-pill-badge ui-pill-badge--count ui-pill-badge--muted"></span>
       </div>
-      <nav aria-label="Vaults"></nav>
-      <p class="ui-empty-state" role="status" hidden>No matching vaults.</p>
-      <footer class="vault-dashboard-footer">Press <kbd>Enter</kbd> to open the first match</footer>
+      <nav aria-label="${t('vault.vaults')}"></nav>
+      <p class="ui-empty-state" role="status" hidden>${t('vault.noMatchingVaults')}</p>
+      <footer class="vault-dashboard-footer">${t('vault.pressKeyToOpenTheFirstMatch', { key: '<kbd>Enter</kbd>' })}</footer>
     </main>`;
   container.querySelector('.ui-pill-badge').textContent = String(vaults.length);
   const list = container.querySelector('nav');

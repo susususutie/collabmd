@@ -1,16 +1,17 @@
 import { commitButtonLabel } from '../../domain/git-labels.js';
 import { createWorkspaceChange } from '../../../domain/workspace-change.js';
+import { t } from '../../i18n/index.js';
 
 export const gitFeature = {
   formatPullBackupToast(pullBackup = null) {
     const fileCount = Number(pullBackup?.fileCount || 0);
     if (fileCount === 1) {
-      return 'Pulled latest changes. 1 overlapping local file was backed up.';
+      return t('git.pulledLatestChanges1OverlappingLocalFileWas');
     }
     if (fileCount > 1) {
-      return `Pulled latest changes. ${fileCount} overlapping local files were backed up.`;
+      return t('git.pulledLatestChangesCountOverlappingLocalFiles', { count: fileCount });
     }
-    return 'Pulled latest changes. Overlapping local changes were recorded in a pull backup.';
+    return t('git.pulledLatestChangesOverlappingLocalChangesWere');
   },
 
   setGitOperationStatus(message = '') {
@@ -132,9 +133,9 @@ export const gitFeature = {
 
     button.classList.remove('hidden');
     if (mode === 'history-preview') {
-      label.textContent = 'Back to history';
-      button.setAttribute('aria-label', 'Back to file history');
-      button.title = 'Back to file history';
+      label.textContent = t('git.backToHistory');
+      button.setAttribute('aria-label', t('git.backToFileHistory'));
+      button.title = t('git.backToFileHistory');
       return;
     }
 
@@ -143,9 +144,9 @@ export const gitFeature = {
       return;
     }
 
-    label.textContent = 'History';
-    button.setAttribute('aria-label', 'Open file history');
-    button.title = 'View file history';
+    label.textContent = t('common.history');
+    button.setAttribute('aria-label', t('git.openFileHistory'));
+    button.title = t('git.viewFileHistory');
   },
 
   syncReviewFileChangesButton({
@@ -188,7 +189,7 @@ export const gitFeature = {
     this.gitPanel.setMode('changes');
     this.showDiffState();
     this.syncMainChrome({
-      badgeLabel: 'Diff',
+      badgeLabel: t('git.diff'),
       mode: 'diff',
       title: this.gitDiffView.getToolbarTitle({ filePath, scope }),
     });
@@ -202,7 +203,7 @@ export const gitFeature = {
     this.gitPanel.setSelection(hash ? { commitHash: hash, path, source: 'commit' } : { source: 'commit' });
     this.showDiffState();
     this.syncMainChrome({
-      badgeLabel: 'Diff',
+      badgeLabel: t('git.diff'),
       mode: 'diff',
       title: this.gitDiffView.getToolbarTitle({ commitHash: hash, path, source: 'commit' }),
     });
@@ -217,7 +218,7 @@ export const gitFeature = {
     this.workspaceRouteController?.showEmptyState?.();
     this.syncMainChrome({
       mode: 'empty',
-      title: 'Git History',
+      title: t('git.gitHistory'),
     });
     this.syncFileHistoryButton({ mode: 'empty' });
   },
@@ -238,7 +239,7 @@ export const gitFeature = {
     this.handleCommentSelectionChange?.(null);
     this.workspaceRouteController?.showFileHistoryState?.(filePath);
     this.syncMainChrome({
-      badgeLabel: 'History',
+      badgeLabel: t('common.history'),
       mode: 'history',
       title: this.getDisplayName(filePath),
     });
@@ -280,9 +281,9 @@ export const gitFeature = {
   _handleGitFilePreviewError(error, resolvedCurrentFilePath) {
     console.error('[git-preview] Failed to load file snapshot:', error);
     this.clearStaticPreviewDocument?.();
-    this.toastController.show('Failed to load historical file preview');
+    this.toastController.show(t('git.failedToLoadHistoricalFilePreview'));
     this.workspacePreviewController.renderTextFilePreview({
-      content: 'Failed to load historical file preview.',
+      content: t('git.failedToLoadHistoricalFilePreview2'),
       filePath: resolvedCurrentFilePath,
     });
     this.elements.outlineToggle?.classList.add('hidden');
@@ -305,7 +306,7 @@ export const gitFeature = {
     this.workspaceRouteController?.showPreviewOnlyState?.(resolvedCurrentFilePath);
     this.layoutController.setView('preview', { persist: false });
     this.syncMainChrome({
-      badgeLabel: 'History Preview',
+      badgeLabel: t('git.historyPreview'),
       mode: 'history-preview',
       title: this.getDisplayName(resolvedCurrentFilePath),
     });
@@ -434,8 +435,8 @@ export const gitFeature = {
       this.navigation.navigateToFile(renameEntry.newPath);
       this.toastController.show(
         local
-          ? `${displayName} moved to ${this.getDisplayName(renameEntry.newPath)}`
-          : `${displayName} moved on disk`,
+          ? t('git.nameMovedToNext', { name: displayName, next: this.getDisplayName(renameEntry.newPath) })
+          : t('git.nameMovedOnDisk', { name: displayName }),
       );
       return true;
     }
@@ -443,8 +444,8 @@ export const gitFeature = {
     this.navigation.navigateToFile(null);
     this.toastController.show(
       local
-        ? `${displayName} was removed by ${action}`
-        : `${displayName} was removed after a ${action} operation`,
+        ? t('git.nameWasRemovedByAction', { name: displayName, action })
+        : t('git.nameWasRemovedAfterAActionOperation', { name: displayName, action }),
     );
     return true;
   },
@@ -494,7 +495,7 @@ export const gitFeature = {
         ? this.session?.flashExternalUpdate?.(highlightRange)
         : false;
       if (!didFlash) {
-        this.toastController.show(`${this.getDisplayName(this.currentFilePath)} updated from disk`);
+        this.toastController.show(t('git.nameUpdatedFromDisk', { name: this.getDisplayName(this.currentFilePath) }));
       }
     }
 
@@ -503,7 +504,7 @@ export const gitFeature = {
       && Array.isArray(event.reloadRequiredPaths)
       && event.reloadRequiredPaths.includes(this.currentFilePath)
     ) {
-      this.toastController.show(`${this.getDisplayName(this.currentFilePath)} needs a manual reload`);
+      this.toastController.show(t('git.nameNeedsAManualReload', { name: this.getDisplayName(this.currentFilePath) }));
     }
   },
 
@@ -512,7 +513,7 @@ export const gitFeature = {
       return;
     }
 
-    await this.runGitActionWithStatus('Staging changes...', async () => {
+    await this.runGitActionWithStatus(t('git.stagingChanges'), async () => {
       const result = await this.postGitAction('stage', { path: filePath });
       await this.finalizeGitAction({
         action: 'stage',
@@ -528,7 +529,7 @@ export const gitFeature = {
       return;
     }
 
-    await this.runGitActionWithStatus('Unstaging changes...', async () => {
+    await this.runGitActionWithStatus(t('git.unstagingChanges'), async () => {
       const result = await this.postGitAction('unstage', { path: filePath });
       await this.finalizeGitAction({
         action: 'unstage',
@@ -540,21 +541,21 @@ export const gitFeature = {
   },
 
   async stageAllGitFiles() {
-    await this.runGitActionWithStatus('Staging all changes...', async () => {
+    await this.runGitActionWithStatus(t('git.stagingAllChanges'), async () => {
       const result = await this.postGitAction('stage-all', {});
       await this.finalizeGitAction({ action: 'stage-all', preferredScope: 'staged', result });
     });
   },
 
   async unstageAllGitFiles() {
-    await this.runGitActionWithStatus('Unstaging all changes...', async () => {
+    await this.runGitActionWithStatus(t('git.unstagingAllChanges'), async () => {
       const result = await this.postGitAction('unstage-all', {});
       await this.finalizeGitAction({ action: 'unstage-all', preferredScope: 'working-tree', result });
     });
   },
 
   async pushGitBranch() {
-    await this.runGitActionWithStatus('Pushing branch...', async () => {
+    await this.runGitActionWithStatus(t('git.pushingBranch'), async () => {
       try {
         const result = await this.postGitAction('push', {});
         await this.finalizeGitAction({
@@ -562,13 +563,13 @@ export const gitFeature = {
           result,
         });
       } catch (error) {
-        this.toastController.show(error.message || 'Failed to push branch');
+        this.toastController.show(error.message || t('git.failedToPushBranch'));
       }
     });
   },
 
   async pullGitBranch() {
-    await this.runGitActionWithStatus('Pulling branch...', async () => {
+    await this.runGitActionWithStatus(t('git.pullingBranch'), async () => {
       try {
         const result = await this.postGitAction('pull', {});
         await this.finalizeGitAction({
@@ -581,16 +582,16 @@ export const gitFeature = {
         }
       } catch (error) {
         if (error?.code === 'pull_conflicted_commits') {
-          this.toastController.show('Cannot pull automatically because local and remote commits conflict.', 5000);
+          this.toastController.show(t('git.cannotPullAutomaticallyBecauseLocalAndRemote'), 5000);
           return;
         }
 
         if (error?.code === 'pull_conflicted_after_autostash') {
-          this.toastController.show('Pull updated the branch, but reapplying local changes caused conflicts. Review the conflicted files and the pull backup summary.', 6000);
+          this.toastController.show(t('git.pullUpdatedTheBranchButReapplyingLocalChanges'), 6000);
           return;
         }
 
-        this.toastController.show(error.message || 'Failed to pull branch');
+        this.toastController.show(error.message || t('git.failedToPullBranch'));
       }
     });
   },
@@ -607,14 +608,14 @@ export const gitFeature = {
 
     this.pendingGitResetPath = filePath;
     if (this.elements.gitResetTitle) {
-      this.elements.gitResetTitle.textContent = 'Reset file to current branch';
+      this.elements.gitResetTitle.textContent = t('git.resetFileToCurrentBranch');
     }
     if (this.elements.gitResetCopy) {
-      this.elements.gitResetCopy.textContent = 'Restore this file from the current checked-out branch. If this branch does not contain the file, the file will be deleted locally.';
+      this.elements.gitResetCopy.textContent = t('git.restoreThisFileFromTheCurrentCheckedOutBranchIf');
     }
     this.elements.gitResetFileName.value = filePath;
     if (this.elements.gitResetSubmit) {
-      this.elements.gitResetSubmit.textContent = 'Reset file';
+      this.elements.gitResetSubmit.textContent = t('git.resetFile');
     }
     this.elements.gitResetSubmit?.toggleAttribute('disabled', false);
 
@@ -638,10 +639,10 @@ export const gitFeature = {
 
     submit?.toggleAttribute('disabled', true);
     if (submit) {
-      submit.textContent = 'Resetting…';
+      submit.textContent = t('git.resetting');
     }
     try {
-      await this.runGitActionWithStatus('Resetting file…', async () => {
+      await this.runGitActionWithStatus(t('git.resettingFile'), async () => {
         const result = await this.postGitAction('reset-file', { path: filePath });
         await this.finalizeGitAction({
           action: 'reset',
@@ -652,10 +653,10 @@ export const gitFeature = {
       });
       dialog.close();
     } catch (error) {
-      this.toastController.show(error.message || 'Failed to reset file');
+      this.toastController.show(error.message || t('git.failedToResetFile'));
     } finally {
       if (submit) {
-        submit.textContent = 'Reset file';
+        submit.textContent = t('git.resetFile');
       }
       submit?.toggleAttribute('disabled', false);
     }
@@ -679,8 +680,10 @@ export const gitFeature = {
     }
     if (this.elements.gitCommitCopy) {
       this.elements.gitCommitCopy.textContent = includedFileCount > 0
-        ? `This commit will include ${includedFileCount} file${includedFileCount === 1 ? '' : 's'}.`
-        : 'All included changes will be committed.';
+        ? t('git.thisCommitWillIncludeFiles', {
+          files: t('git.file', { count: includedFileCount }),
+        })
+        : t('git.allIncludedChangesWillBeCommitted');
     }
     if (this.elements.gitCommitSubmit) {
       this.elements.gitCommitSubmit.textContent = commitLabel;
@@ -711,16 +714,16 @@ export const gitFeature = {
     }
     if (!message) {
       input.focus();
-      this.toastController.show('Describe what changed before committing');
+      this.toastController.show(t('git.describeWhatChangedBeforeCommitting'));
       return;
     }
 
     submit?.toggleAttribute('disabled', true);
     if (submit) {
-      submit.textContent = 'Committing...';
+      submit.textContent = t('git.committing');
     }
     try {
-      await this.runGitActionWithStatus('Committing changes...', async () => {
+      await this.runGitActionWithStatus(t('git.committingChanges'), async () => {
         const result = await this.postGitAction('commit', {
           message,
         });
@@ -731,10 +734,10 @@ export const gitFeature = {
       });
       dialog.close();
     } catch (error) {
-      this.toastController.show(error.message || 'Failed to commit included changes');
+      this.toastController.show(error.message || t('git.failedToCommitIncludedChanges'));
     } finally {
       if (submit) {
-        submit.textContent = 'Commit included files';
+        submit.textContent = t('git.commitIncludedFiles');
       }
       submit?.toggleAttribute('disabled', false);
     }

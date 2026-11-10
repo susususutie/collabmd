@@ -25,7 +25,7 @@ async function postJson(path, payload, { fallbackError, requestId = null } = {})
 export const gitApiClient = {
   async readStatus({ force = false } = {}) {
     const response = await fetch(resolveApiUrl(`/git/status${force ? '?force=true' : ''}`));
-    return parseApiResponse(response, 'Failed to load git status');
+    return parseApiResponse(response, 'git.failedToLoadGitStatus');
   },
 
   getPullBackupSummaryUrl(backupId) {
@@ -35,19 +35,19 @@ export const gitApiClient = {
 
   async readPullBackups() {
     const response = await fetch(resolveApiUrl('/git/pull-backups'));
-    return parseApiResponse(response, 'Failed to load pull backups');
+    return parseApiResponse(response, 'git.failedToLoadPullBackups');
   },
 
   async readHistory({ limit, offset } = {}) {
     const params = createSearchParams({ limit, offset });
     const response = await fetch(resolveApiUrl(`/git/history?${params.toString()}`));
-    return parseApiResponse(response, 'Failed to load git history');
+    return parseApiResponse(response, 'git.failedToLoadGitHistory');
   },
 
   async readFileHistory({ path, limit, offset } = {}) {
     const params = createSearchParams({ limit, offset, path });
     const response = await fetch(resolveApiUrl(`/git/file-history?${params.toString()}`));
-    return parseApiResponse(response, 'Failed to load file history');
+    return parseApiResponse(response, 'git.failedToLoadFileHistory');
   },
 
   async readDiff({
@@ -63,7 +63,7 @@ export const gitApiClient = {
       scope,
     });
     const response = await fetch(resolveApiUrl(`/git/diff?${params.toString()}`));
-    return parseApiResponse(response, 'Failed to load git diff');
+    return parseApiResponse(response, 'git.failedToLoadGitDiff');
   },
 
   async readCommit({
@@ -79,13 +79,13 @@ export const gitApiClient = {
       path,
     });
     const response = await fetch(resolveApiUrl(`/git/commit?${params.toString()}`));
-    return parseApiResponse(response, 'Failed to load git commit');
+    return parseApiResponse(response, 'git.failedToLoadGitCommit');
   },
 
   async readFileSnapshot({ hash, path } = {}) {
     const params = createSearchParams({ hash, path });
     const response = await fetch(resolveApiUrl(`/git/file-snapshot?${params.toString()}`));
-    return parseApiResponse(response, 'Failed to load historical file preview');
+    return parseApiResponse(response, 'git.failedToLoadHistoricalFilePreview');
   },
 
   getFileAttachmentUrl({ hash, path } = {}) {
@@ -94,34 +94,34 @@ export const gitApiClient = {
   },
 
   async stageFile({ path, requestId = null } = {}) {
-    return postJson('/git/stage', { path }, { requestId, fallbackError: 'Failed to stage file' });
+    return postJson('/git/stage', { path }, { requestId, fallbackError: 'git.failedToStageFile' });
   },
 
   async unstageFile({ path, requestId = null } = {}) {
-    return postJson('/git/unstage', { path }, { requestId, fallbackError: 'Failed to unstage file' });
+    return postJson('/git/unstage', { path }, { requestId, fallbackError: 'git.failedToUnstageFile' });
   },
 
   async stageAll({ requestId = null } = {}) {
-    return postJson('/git/stage-all', {}, { requestId, fallbackError: 'Failed to stage all changes' });
+    return postJson('/git/stage-all', {}, { requestId, fallbackError: 'git.failedToStageAllChanges' });
   },
 
   async unstageAll({ requestId = null } = {}) {
-    return postJson('/git/unstage-all', {}, { requestId, fallbackError: 'Failed to unstage all changes' });
+    return postJson('/git/unstage-all', {}, { requestId, fallbackError: 'git.failedToUnstageAllChanges' });
   },
 
   async pushBranch({ requestId = null } = {}) {
-    return postJson('/git/push', {}, { requestId, fallbackError: 'Failed to push branch' });
+    return postJson('/git/push', {}, { requestId, fallbackError: 'git.failedToPushBranch' });
   },
 
   async pullBranch({ requestId = null } = {}) {
-    return postJson('/git/pull', {}, { requestId, fallbackError: 'Failed to pull branch' });
+    return postJson('/git/pull', {}, { requestId, fallbackError: 'git.failedToPullBranch' });
   },
 
   async resetFile({ path, requestId = null } = {}) {
-    return postJson('/git/reset-file', { path }, { requestId, fallbackError: 'Failed to reset file' });
+    return postJson('/git/reset-file', { path }, { requestId, fallbackError: 'git.failedToResetFile' });
   },
 
   async commit({ message, requestId = null } = {}) {
-    return postJson('/git/commit', { message }, { requestId, fallbackError: 'Failed to commit staged changes' });
+    return postJson('/git/commit', { message }, { requestId, fallbackError: 'git.failedToCommitStagedChanges' });
   },
 };

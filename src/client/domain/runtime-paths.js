@@ -132,7 +132,7 @@ export function getClientRuntimeConfig() {
       available: false,
       backend: 'ripgrep',
       minQueryLength: 2,
-      unavailableReason: 'ripgrep search is unavailable',
+      unavailableReason: 'search.ripgrepSearchIsUnavailable',
       version: '',
     },
     structurizrEnabled: false,

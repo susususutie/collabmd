@@ -9,6 +9,7 @@ import {
   markdownToolbarLayout,
 } from '../../domain/markdown-toolbar-actions.js';
 import { escapeHtml } from '../../domain/vault-utils.js';
+import { t } from '../../i18n/index.js';
 
 const IMAGE_FILE_PICKER_ACCEPT = 'image/png,image/jpeg,image/webp,image/gif,image/svg+xml';
 const DEFAULT_BLOCK_ACTION = 'paragraph';
@@ -40,13 +41,13 @@ function renderBlockMenuMarkup(activeAction) {
         class="ui-button ui-button--ghost markdown-toolbar-block-trigger"
         data-markdown-block-menu-toggle
         popovertarget="markdownBlockMenuPopover"
-        title="Block formatting"
+        title="${t('app.blockFormatting')}"
       >
         <span class="markdown-toolbar-block-trigger-label" data-markdown-block-trigger-label>${triggerLabel}</span>
         <span class="markdown-toolbar-block-trigger-icon" aria-hidden="true">${icons.chevronDown}</span>
       </button>
       <div id="markdownBlockMenuPopover" class="markdown-toolbar-popover" popover="auto">
-        <div class="markdown-toolbar-menu" data-markdown-block-menu role="menu" aria-label="Block formatting">
+        <div class="markdown-toolbar-menu" data-markdown-block-menu role="menu" aria-label="${t('app.blockFormatting')}">
           ${renderBlockMenuItemsMarkup(activeAction)}
         </div>
       </div>
@@ -139,8 +140,8 @@ function syncMarkdownToolbarBlockUi() {
 
   const toggle = root.querySelector('[data-markdown-block-menu-toggle]');
   if (toggle && actionMeta) {
-    toggle.setAttribute('aria-label', `${actionMeta.label}. Block formatting`);
-    toggle.setAttribute('title', `${actionMeta.label}. Block formatting`);
+    toggle.setAttribute('aria-label', t('app.labelBlockFormatting', { label: actionMeta.label }));
+    toggle.setAttribute('title', t('app.labelBlockFormatting', { label: actionMeta.label }));
   }
 
   const blockActionItems = root.querySelectorAll('[data-markdown-block-action]');
@@ -264,7 +265,7 @@ function applyMarkdownToolbarAction(action) {
   const normalizedAction = normalizeToolbarAction(action);
   const applied = this.session.applyMarkdownToolbarAction(normalizedAction);
   if (!applied) {
-    this.toastController.show('Formatting action is unavailable');
+    this.toastController.show(t('app.formattingActionIsUnavailable'));
     return;
   }
 
@@ -277,7 +278,7 @@ function applyMarkdownToolbarAction(action) {
 function runEditorCommand(commandId) {
   const ran = this.session?.runEditorCommand?.(commandId);
   if (!ran) {
-    this.toastController.show('Editor action is unavailable');
+    this.toastController.show(t('app.editorActionIsUnavailable'));
     return false;
   }
 
@@ -338,7 +339,7 @@ async function handleEditorImageInsert(file) {
     return true;
   } catch (error) {
     console.error('[ui] Failed to insert image attachment:', error);
-    this.toastController.show(error.message || 'Failed to upload image');
+    this.toastController.show(error.message || t('app.failedToUploadImage'));
     return false;
   }
 }
@@ -347,9 +348,9 @@ async function handleEditorImageInsert(file) {
 async function copyCurrentLink() {
   try {
     await navigator.clipboard.writeText(window.location.href);
-    this.toastController.show('Link copied');
+    this.toastController.show(t('app.linkCopied'));
   } catch {
-    this.toastController.show('Failed to copy link');
+    this.toastController.show(t('app.failedToCopyLink'));
   }
 }
 

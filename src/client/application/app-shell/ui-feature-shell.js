@@ -1,4 +1,5 @@
 import { getVaultFileKind, supportsBacklinksForFilePath } from '../../../domain/file-kind.js';
+import { getLocale, getLocaleDisplayName, setLocalePreference, t } from '../../i18n/index.js';
 import { isPlainQuickSwitcherShortcut } from '../../domain/keyboard-shortcuts.js';
 import { createFileRouteHash, isCollabMdHashRoute, isGitHashRouteType } from '../../domain/hash-routes.js';
 
@@ -54,6 +55,7 @@ async function initialize() {
   this.renderMarkdownToolbar?.();
   this.initializeVisualViewportBinding?.();
   this.themeController.initialize();
+  initializeLanguageToggle();
   this.previewRenderer.applyTheme(this.themeController.getTheme());
   this.outlineController.initialize();
   this.layoutController.initialize();
@@ -108,6 +110,31 @@ async function initialize() {
 }
 
 /** @this {UiShellContext} */
+function initializeLanguageToggle() {
+  const button = document.getElementById('languageToggleBtn');
+  if (!button) {
+    return;
+  }
+
+  const state = button.querySelector('[data-language-toggle-state]');
+  if (state) {
+    state.textContent = getLocaleDisplayName();
+  }
+
+  button.addEventListener('click', () => {
+    const nextLocale = getLocale() === 'zh-CN' ? 'en' : 'zh-CN';
+    setLocalePreference(nextLocale);
+    const url = new URL(window.location.href);
+    if (url.searchParams.has('lang')) {
+      url.searchParams.set('lang', nextLocale);
+      window.location.assign(url.toString());
+    } else {
+      // Assigning the identical URL (hash included) is a same-document navigation and would not reload.
+      window.location.reload();
+    }
+  });
+}
+
 function initializeVersionMonitoring() {
   this.versionMonitor?.start();
 }
@@ -155,11 +182,11 @@ function promptForVersionReload(payload = null) {
   this._reloadPromptShown = true;
   const packageVersion = String(payload?.build?.packageVersion ?? this.runtimeConfig?.build?.packageVersion ?? '').trim();
   const message = packageVersion
-    ? `Version ${packageVersion} is available. Reload to update.`
-    : 'A new version is available. Reload to update.';
+    ? t('app.versionVersionIsAvailableReloadToUpdate', { version: packageVersion })
+    : t('app.aNewVersionIsAvailableReloadToUpdate');
 
   this.toastController.show(message, {
-    actionLabel: 'Reload',
+    actionLabel: t('app.reload'),
     dismissible: true,
     duration: VERSION_RELOAD_TOAST_DURATION_MS,
     onAction: () => window.location.reload(),
@@ -244,7 +271,7 @@ function bindDialogEvents() {
       this.elements.gitCommitInput.value = '';
     }
     if (this.elements.gitCommitSubmit) {
-      this.elements.gitCommitSubmit.textContent = 'Commit included files';
+      this.elements.gitCommitSubmit.textContent = t('app.commitIncludedFiles');
     }
   });
 
@@ -254,7 +281,7 @@ function bindDialogEvents() {
       this.elements.gitResetFileName.value = '';
     }
     if (this.elements.gitResetSubmit) {
-      this.elements.gitResetSubmit.textContent = 'Reset file';
+      this.elements.gitResetSubmit.textContent = t('app.resetFile');
     }
   });
 
@@ -569,15 +596,15 @@ function createPreviewHeadingLinkUrl(anchorId) {
 async function copyPreviewHeadingLink(anchorId) {
   const url = this.createPreviewHeadingLinkUrl(anchorId);
   if (!url) {
-    this.toastController.show('Failed to copy section link');
+    this.toastController.show(t('app.failedToCopySectionLink'));
     return;
   }
 
   try {
     await copyTextToClipboard(url);
-    this.toastController.show('Section link copied');
+    this.toastController.show(t('app.sectionLinkCopied'));
   } catch {
-    this.toastController.show('Failed to copy section link');
+    this.toastController.show(t('app.failedToCopySectionLink'));
   }
 }
 
@@ -590,9 +617,9 @@ async function copyPreviewCodeBlock(button) {
 
   try {
     await copyTextToClipboard(code.textContent);
-    this.toastController.show('Code copied');
+    this.toastController.show(t('app.codeCopied'));
   } catch {
-    this.toastController.show('Failed to copy code');
+    this.toastController.show(t('app.failedToCopyCode'));
   }
 }
 
@@ -606,8 +633,8 @@ function syncHeadingFoldButtonState(heading, button) {
   const collapsed = heading.dataset.previewHeadingCollapsed === 'true';
   heading.setAttribute('aria-expanded', String(!collapsed));
   button.setAttribute('aria-expanded', String(!collapsed));
-  button.setAttribute('aria-label', `${collapsed ? 'Expand' : 'Collapse'} ${headingLabel}`);
-  button.setAttribute('title', `${collapsed ? 'Expand' : 'Collapse'} section`);
+  button.setAttribute('aria-label', t('app.actionHeading', { action: collapsed ? t('app.expand') : t('common.collapse'), heading: headingLabel }));
+  button.setAttribute('title', t(collapsed ? 'app.expandSection' : 'app.collapseSection'));
 }
 
 /** @this {UiShellContext} */
@@ -646,8 +673,8 @@ function attachPreviewHeadingControls(heading) {
 
   const headingLabel = getHeadingLinkLabel(heading);
   linkButton.dataset.previewHeadingAnchor = heading.id;
-  linkButton.setAttribute('aria-label', `Copy link to ${headingLabel}`);
-  linkButton.setAttribute('title', 'Copy link to this section');
+  linkButton.setAttribute('aria-label', t('app.copyLinkToHeading', { heading: headingLabel }));
+  linkButton.setAttribute('title', t('app.copyLinkToThisSection'));
   if (linkButton.parentElement !== heading) {
     heading.append(linkButton);
   }
@@ -663,10 +690,10 @@ function attachPreviewCodeCopyButton(pre) {
     const button = document.createElement('button');
     button.type = 'button';
     button.className = 'ui-button ui-button--secondary ui-button--compact preview-code-copy-button';
-    button.setAttribute('aria-label', 'Copy code');
-    button.title = 'Copy code';
+    button.setAttribute('aria-label', t('app.copyCode'));
+    button.title = t('app.copyCode');
     // pi-lens-ignore: no-inner-html-js
-    button.innerHTML = `${PREVIEW_CODE_COPY_ICON}<span data-preview-code-copy-label>Copy</span>`;
+    button.innerHTML = `${PREVIEW_CODE_COPY_ICON}<span data-preview-code-copy-label>${t('common.copy')}</span>`;
     this._previewCodeCopyButton = button;
   }
 
@@ -781,8 +808,8 @@ function syncPreviewHeadingLinkButtons() {
 
   const headingLabel = getHeadingLinkLabel(heading);
   linkButton.dataset.previewHeadingAnchor = heading.id;
-  linkButton.setAttribute('aria-label', `Copy link to ${headingLabel}`);
-  linkButton.setAttribute('title', 'Copy link to this section');
+  linkButton.setAttribute('aria-label', t('app.copyLinkToHeading', { heading: headingLabel }));
+  linkButton.setAttribute('title', t('app.copyLinkToThisSection'));
 }
 
 
@@ -979,7 +1006,7 @@ function handleConnectionChange(state) {
 
   if (state.unreachable && !this.connectionHelpShown) {
     this.connectionHelpShown = true;
-    this.toastController.show(`Cannot reach server at ${state.wsBaseUrl}`, 6000);
+    this.toastController.show(t('app.cannotReachServerAtUrl', { url: state.wsBaseUrl }), 6000);
   }
 }
 
@@ -1008,16 +1035,16 @@ async function formatCurrentDocument() {
   try {
     const result = await this.session?.formatDocument?.(this.currentFilePath);
     const messages = {
-      changed: 'Document changed while formatting. Try again.',
+      changed: t('app.documentChangedWhileFormattingTryAgain'),
       formatted: getVaultFileKind(this.currentFilePath) === 'plantuml'
-        ? 'PlantUML indentation applied'
-        : 'Document formatted',
-      unchanged: 'Document is already formatted',
-      unsupported: 'Formatting is unavailable for this file type',
+        ? t('app.plantumlIndentationApplied')
+        : t('app.documentFormatted'),
+      unchanged: t('app.documentIsAlreadyFormatted'),
+      unsupported: t('app.formattingIsUnavailableForThisFileType'),
     };
     this.toastController.show(messages[result] ?? messages.unsupported);
   } catch (error) {
-    this.toastController.show(`Formatting failed: ${error?.message || 'Unknown error'}`, 5000);
+    this.toastController.show(t('app.formattingFailedMessage', { message: error?.message || t('app.unknownError') }), 5000);
   } finally {
     button?.removeAttribute('disabled');
   }
@@ -1043,11 +1070,11 @@ function syncVimModeToggle(state) {
   const enabled = state ?? this.session?.isVimModeEnabled?.() ?? this.getStoredVimMode();
   const label = this.elements.vimModeToggleLabel;
   const button = this.elements.toggleVimModeButton;
-  const nextLabel = enabled ? 'On' : 'Off';
+  const nextLabel = enabled ? t('common.on') : t('common.off');
   if (label) label.textContent = nextLabel;
   if (button) {
-    button.setAttribute('aria-label', `${enabled ? 'Disable' : 'Enable'} Vim keybindings`);
-    button.setAttribute('title', `${enabled ? 'Disable' : 'Enable'} Vim keybindings`);
+    button.setAttribute('aria-label', t(enabled ? 'app.disableVimKeybindings' : 'app.enableVimKeybindings'));
+    button.setAttribute('title', t(enabled ? 'app.disableVimKeybindings' : 'app.enableVimKeybindings'));
     button.setAttribute('aria-pressed', String(enabled));
   }
 }
@@ -1056,11 +1083,11 @@ function syncVimModeToggle(state) {
 function syncCursorNamesToggle(visible = this.preferences.getCursorNamesVisible()) {
   this.elements.editorContainer?.classList.toggle('hide-cursor-names', !visible);
   const label = this.elements.cursorNamesToggleLabel;
-  if (label) label.textContent = visible ? 'On' : 'Off';
+  if (label) label.textContent = visible ? t('common.on') : t('common.off');
   const button = this.elements.toggleCursorNamesButton;
   button?.setAttribute('aria-pressed', String(visible));
-  button?.setAttribute('aria-label', `${visible ? 'Hide' : 'Show'} cursor names`);
-  button?.setAttribute('title', `${visible ? 'Hide' : 'Show'} cursor names`);
+  button?.setAttribute('aria-label', t(visible ? 'app.hideCursorNames' : 'app.showCursorNames'));
+  button?.setAttribute('title', t(visible ? 'app.hideCursorNames' : 'app.showCursorNames'));
 }
 
 /** @this {UiShellContext} */
@@ -1068,10 +1095,10 @@ function syncWrapToggle(state) {
   const enabled = state ?? this.session?.isLineWrappingEnabled() ?? this.getStoredLineWrapping();
   const label = this.elements.wrapToggleLabel;
   const button = this.elements.toggleWrapButton;
-  const nextLabel = enabled ? 'Wrap on' : 'Wrap off';
+  const nextLabel = enabled ? t('app.wrapOn') : t('app.wrapOff');
   if (label) label.textContent = nextLabel;
   if (button) {
-    button.setAttribute('aria-label', `${nextLabel}. ${enabled ? 'Disable line wrap' : 'Enable line wrap'}`);
+    button.setAttribute('aria-label', t(enabled ? 'app.labelDisableLineWrap' : 'app.labelEnableLineWrap', { label: nextLabel }));
   }
 }
 
@@ -1090,7 +1117,7 @@ function showEditorLoading() {
   if (!this.elements.editorContainer) return;
   this.elements.editorContainer.classList.add('is-loading-editor');
   this.elements.editorContainer.innerHTML = `
-      <div class="editor-loading" id="editorLoading" role="status" aria-live="polite" aria-label="Loading file…">
+      <div class="editor-loading" id="editorLoading" role="status" aria-live="polite" aria-label="${t('app.loadingFile')}">
         <div class="skeleton-line skeleton-line--title skeleton-line--break"></div>
         <div class="skeleton-line skeleton-line--full"></div>
         <div class="skeleton-line skeleton-line--ninety"></div>
@@ -1107,7 +1134,7 @@ function hideEditorLoading() {
 }
 
 /** @this {UiShellContext} */
-function showEditorLoadError(message = 'Failed to load file') {
+function showEditorLoadError(message = t('app.failedToLoadFile')) {
   if (!this.elements.editorContainer) return;
   const loading = document.createElement('div');
   const text = document.createElement('span');

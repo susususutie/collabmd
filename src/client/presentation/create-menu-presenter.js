@@ -1,3 +1,4 @@
+import { t } from '../i18n/index.js';
 import { buttonClassNames } from './components/ui/button.js';
 
 function getDefaultMobileBreakpointQuery() {
@@ -45,7 +46,7 @@ export class CreateMenuPresenter {
     this.open(options);
   }
 
-  open({ anchor = null, items = [], title = 'Create' } = {}) {
+  open({ anchor = null, items = [], title = t('common.create') } = {}) {
     this.close({ restoreFocus: false });
 
     if (!Array.isArray(items) || items.length === 0) {
@@ -143,7 +144,7 @@ export class CreateMenuPresenter {
       variant: 'ghost',
       extra: ['file-action-sheet-item', 'create-action-sheet-cancel'],
     });
-    cancelButton.textContent = 'Cancel';
+    cancelButton.textContent = t('common.cancel');
     cancelButton.addEventListener('click', () => {
       this.close();
     });

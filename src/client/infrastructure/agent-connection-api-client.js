@@ -4,7 +4,7 @@ import { parseApiResponse } from './api-client-utils.js';
 export const agentConnectionApiClient = {
   listConnections() {
     return fetch(resolveApiUrl('/agent/connections'))
-      .then((response) => parseApiResponse(response, 'Failed to load Agent Connections'));
+      .then((response) => parseApiResponse(response, 'agent.failedToLoadAgentConnections'));
   },
 
   createConnection(payload) {
@@ -12,12 +12,12 @@ export const agentConnectionApiClient = {
       body: JSON.stringify(payload),
       headers: { 'Content-Type': 'application/json' },
       method: 'POST',
-    }).then((response) => parseApiResponse(response, 'Failed to create Agent Connection'));
+    }).then((response) => parseApiResponse(response, 'agent.failedToCreateAgentConnection'));
   },
 
   revokeConnection(connectionId) {
     return fetch(resolveApiUrl(`/agent/connections/${encodeURIComponent(connectionId)}`), {
       method: 'DELETE',
-    }).then((response) => parseApiResponse(response, 'Failed to revoke Agent Connection'));
+    }).then((response) => parseApiResponse(response, 'agent.failedToRevokeAgentConnection'));
   },
 };

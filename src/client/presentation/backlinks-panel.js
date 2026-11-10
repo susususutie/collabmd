@@ -1,5 +1,6 @@
 import { stripVaultFileExtension } from '../../domain/file-kind.js';
 import { escapeHtml } from '../domain/vault-utils.js';
+import { t } from '../i18n/index.js';
 
 /**
  * BacklinksPanel — renders "Linked Mentions" for the current file.
@@ -197,7 +198,7 @@ export class BacklinksPanel {
 
   _render() {
     const count = this._backlinks.length;
-    const label = count === 1 ? 'Linked Mention' : 'Linked Mentions';
+    const label = count === 1 ? t('file.linkedMention') : t('file.linkedMentions');
     const shouldShow = Boolean(this._currentFile) && count > 0;
 
     if (!shouldShow) {
@@ -283,7 +284,7 @@ export class BacklinksPanel {
     if (backlink.contexts.length > 3) {
       const moreElement = this.documentRef.createElement('div');
       moreElement.className = 'backlink-context backlink-more';
-      moreElement.textContent = `+${backlink.contexts.length - 3} more`;
+      moreElement.textContent = t('file.countMore', { count: backlink.contexts.length - 3 });
       item.appendChild(moreElement);
     }
 

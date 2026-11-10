@@ -1,3 +1,4 @@
+import { t } from '../i18n/index.js';
 import {
   createDiagramExportFileNames,
   exportSvgMarkupFromElement,
@@ -117,7 +118,7 @@ export class PlantUmlPreviewHydrator extends DiagramPreviewHydrator {
         sourceNode?.after(createDiagramErrorPlaceholderCard({
           key,
           kind: 'plantuml',
-          label: shell.dataset.plantumlLabel || 'PlantUML diagram',
+          label: shell.dataset.plantumlLabel || t('preview.plantumlDiagram'),
           message,
         }));
       }
@@ -152,7 +153,7 @@ export class PlantUmlPreviewHydrator extends DiagramPreviewHydrator {
     return request;
   }
 
-  resetShell(shell, { clearCache = false, message = 'Renders server-side when visible' } = {}) {
+  resetShell(shell, { clearCache = false, message = t('preview.rendersServerSideWhenVisible') } = {}) {
     const source = shell.querySelector('.plantuml-source')?.textContent ?? '';
     if (clearCache && source) {
       this.svgCache.delete(source);
@@ -202,7 +203,7 @@ export class PlantUmlPreviewHydrator extends DiagramPreviewHydrator {
       onReload: () => {
         this.resetShell(shell, {
           clearCache: true,
-          message: 'Refreshing…',
+          message: t('preview.refreshing'),
         });
         this.enqueueShell(shell, { prioritize: true });
       },

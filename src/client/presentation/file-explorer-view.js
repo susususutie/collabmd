@@ -7,6 +7,7 @@ import { escapeHtml } from '../domain/vault-utils.js';
 import { findFuzzyMatch } from '../domain/file-search.js';
 import { getActiveVaultId } from '../domain/runtime-paths.js';
 import { getVaultPathLeaf, getVaultPathParent } from '../domain/vault-paths.js';
+import { t } from '../i18n/index.js';
 import { buttonClassNames } from './components/ui/button.js';
 
 
@@ -127,8 +128,8 @@ export class FileExplorerView {
     button.className = 'vault-switcher-button';
     button.id = 'vaultSwitcher';
     button.setAttribute('aria-haspopup', 'menu');
-    button.setAttribute('aria-label', `Switch vault (current: ${active.name || active.id})`);
-    button.title = 'Switch vault';
+    button.setAttribute('aria-label', t('file.switchVaultCurrentName', { name: active.name || active.id }));
+    button.title = t('file.switchVault');
     button.innerHTML = `<span class="vault-switcher-icon" aria-hidden="true"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path></svg></span><span class="vault-switcher-name">${escapeHtml(active.name || active.id)}</span><span class="vault-switcher-chevron" aria-hidden="true"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"></path></svg></span>`;
     button.addEventListener('click', (event) => {
       this.showContextMenu(event, entries.map((vault) => ({
@@ -137,7 +138,7 @@ export class FileExplorerView {
         onSelect: () => (onVaultSelect ?? this.onVaultSelect)?.(vault.id),
       })), {
         alignToAnchor: true,
-        searchPlaceholder: 'Filter vaults…',
+        searchPlaceholder: t('file.filterVaults'),
       });
     });
     wrapper.appendChild(button);
@@ -339,7 +340,7 @@ export class FileExplorerView {
     }
 
     const status = String(query ?? '').trim() && Number.isInteger(matchCount)
-      ? `${matchCount} match${matchCount === 1 ? '' : 'es'}`
+      ? t('file.match', { count: matchCount })
       : '';
     this.searchStatus.textContent = status;
     this.searchStatus.classList.toggle('hidden', !status);
@@ -368,7 +369,7 @@ export class FileExplorerView {
       button.classList.toggle('has-comments', threadCount > 0);
       button.setAttribute(
         'aria-label',
-        `${filePath}${threadCount > 0 ? `, ${threadCount} open comment thread${threadCount === 1 ? '' : 's'}` : ''}`,
+        `${filePath}${threadCount > 0 ? t('file.openCommentThread', { count: threadCount }) : ''}`,
       );
 
       if (threadCount <= 0) {
@@ -488,7 +489,7 @@ export class FileExplorerView {
     if (matches.length > SEARCH_RESULT_LIMIT) {
       const more = document.createElement('div');
       more.className = 'file-tree-empty';
-      more.textContent = `${matches.length - SEARCH_RESULT_LIMIT} more matches. Refine the search.`;
+      more.textContent = t('file.countMoreMatchesRefineTheSearch', { count: matches.length - SEARCH_RESULT_LIMIT });
       fragment.appendChild(more);
     }
     this.treeContainer.appendChild(fragment);
@@ -500,7 +501,7 @@ export class FileExplorerView {
     this.rootDropZone = null;
 
     if (tree.length === 0) {
-      this.treeContainer.innerHTML = '<div class="file-tree-empty">No vault files found</div>';
+      this.treeContainer.innerHTML = `<div class="file-tree-empty">${escapeHtml(t('file.noVaultFilesFound'))}</div>`;
       return;
     }
 
@@ -654,7 +655,7 @@ export class FileExplorerView {
     const threadCount = Number(this.threadCounts.get(filePath) ?? 0);
     button.setAttribute(
       'aria-label',
-      `${filePath}${threadCount > 0 ? `, ${threadCount} open comment thread${threadCount === 1 ? '' : 's'}` : ''}`,
+      `${filePath}${threadCount > 0 ? t('file.openCommentThread', { count: threadCount }) : ''}`,
     );
     if (filePath === activeFilePath) {
       button.classList.add('active');
@@ -712,7 +713,7 @@ export class FileExplorerView {
   createRootDropZone() {
     const zone = document.createElement('div');
     zone.className = 'file-tree-root-drop-zone';
-    zone.textContent = 'Drop here to move to vault root';
+    zone.textContent = t('file.dropHereToMoveToVaultRoot');
     zone.addEventListener('dragenter', (event) => {
       this.handleRootZoneDragEnter(event);
     });
@@ -1097,7 +1098,7 @@ export class FileExplorerView {
     const menu = document.createElement('div');
     menu.className = 'file-context-menu';
     menu.setAttribute('role', 'menu');
-    menu.setAttribute('aria-label', 'File actions');
+    menu.setAttribute('aria-label', t('file.fileActions'));
     const searchInput = searchPlaceholder
       ? createMenuFilterInput({ container: menu, itemSelector: '[role="menuitem"]', placeholder: searchPlaceholder })
       : null;
@@ -1184,13 +1185,13 @@ export class FileExplorerView {
     const { searchPlaceholder = '' } = options ?? {};
     const sheet = document.createElement('dialog');
     sheet.className = 'file-action-sheet';
-    sheet.setAttribute('aria-label', 'File actions');
+    sheet.setAttribute('aria-label', t('file.fileActions'));
     // Native light-dismiss where supported; the cancel/click handlers below
     // cover older browsers and the close listener funnels both paths here.
     sheet.setAttribute('closedby', 'any');
 
     if (searchPlaceholder) {
-      createMenuFilterInput({ container: sheet, itemSelector: '.file-action-sheet-item', placeholder: searchPlaceholder, skipLabels: ['Cancel'] });
+      createMenuFilterInput({ container: sheet, itemSelector: '.file-action-sheet-item', placeholder: searchPlaceholder, skipLabels: [t('common.cancel')] });
     }
     items.forEach((item) => {
       const button = document.createElement('button');
@@ -1214,7 +1215,7 @@ export class FileExplorerView {
       variant: 'ghost',
       extra: 'file-action-sheet-item',
     });
-    cancelButton.textContent = 'Cancel';
+    cancelButton.textContent = t('common.cancel');
     cancelButton.addEventListener('click', () => {
       this.removeContextMenu();
     });

@@ -1,3 +1,4 @@
+import { t } from '../../i18n/index.js';
 import { isMarkdownFilePath } from '../../../domain/file-kind.js';
 import { exportDirectory, exportDocument, initializeExportBridge } from '../../export/export-host.js';
 
@@ -26,7 +27,7 @@ export const exportFeature = {
       });
       return true;
     } catch (error) {
-      this.toastController?.show(error instanceof Error ? error.message : 'Failed to start folder export');
+      this.toastController?.show(error instanceof Error ? error.message : t('export.failedToStartFolderExport'));
       return false;
     }
   },
@@ -34,7 +35,7 @@ export const exportFeature = {
   async handleExportRequest(format) {
     const filePath = String(this.currentFilePath ?? '').trim();
     if (!isMarkdownFilePath(filePath)) {
-      this.toastController?.show('Export is available for markdown notes only');
+      this.toastController?.show(t('export.exportIsAvailableForMarkdownNotesOnly'));
       return false;
     }
 
@@ -48,7 +49,7 @@ export const exportFeature = {
       });
       return true;
     } catch (error) {
-      this.toastController?.show(error instanceof Error ? error.message : 'Failed to start export');
+      this.toastController?.show(error instanceof Error ? error.message : t('export.failedToStartExport'));
       return false;
     }
   },

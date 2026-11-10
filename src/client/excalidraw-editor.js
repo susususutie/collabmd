@@ -52,6 +52,13 @@ import {
   parseExcalidrawElementLink,
 } from './domain/excalidraw-element-link.js';
 import { resolveAppPath, resolveAppUrl } from './domain/runtime-paths.js';
+import {
+  applyDocumentLocale,
+  getLocale,
+  initializeI18n,
+  localizeDocument,
+  t,
+} from './i18n/index.js';
 import { ensureClientAuthenticated } from './infrastructure/auth-client.js';
 import {
   EXCALIDRAW_ROOM_CONNECTION_STATE,
@@ -154,15 +161,15 @@ function getAuthorityBannerText() {
   }
 
   if (roomConnectionState === EXCALIDRAW_ROOM_CONNECTION_STATE.FALLBACK_READONLY) {
-    return 'Showing the saved diagram. Editing will resume after live sync completes.';
+    return t('diagram.showingTheSavedDiagramEditingWillResumeAfterLive');
   }
 
   if (roomConnectionState === EXCALIDRAW_ROOM_CONNECTION_STATE.RECONNECTING_READONLY) {
-    return 'Connection lost. Editing is paused while the diagram reconnects.';
+    return t('diagram.connectionLostEditingIsPausedWhileTheDiagram');
   }
 
   if (roomConnectionState === EXCALIDRAW_ROOM_CONNECTION_STATE.CONNECTING) {
-    return 'Connecting to the live diagram…';
+    return t('diagram.connectingToTheLiveDiagram');
   }
 
   return '';
@@ -224,7 +231,7 @@ function getDiagramAnchorLabel(thread) {
   return formatDiagramAnchorLabel(snapshot?.type || element?.type, elementContent || firstMessageContent);
 }
 
-const diagramCommentTimeFormatter = new Intl.DateTimeFormat(undefined, {
+const diagramCommentTimeFormatter = new Intl.DateTimeFormat(getLocale(), {
   day: 'numeric',
   hour: 'numeric',
   minute: '2-digit',
@@ -247,7 +254,7 @@ function renderDiagramCommentOverviewThread(thread, activeThreadId, onOpen) {
   const latestMessage = getLatestMessage(thread?.messages ?? []);
   const messageCount = Array.isArray(thread?.messages) ? thread.messages.length : 0;
   const button = createCommentOverviewThread({
-    authorName: latestMessage?.userName || thread?.createdByName || 'Anonymous',
+    authorName: latestMessage?.userName || thread?.createdByName || t('diagram.anonymous'),
     buttonClassName: 'comment-overview-thread comments-drawer-item',
     footerClassName: 'comment-overview-thread-footer comments-drawer-item-footer',
     headerClassName: 'comment-overview-thread-header comments-drawer-item-header',
@@ -256,7 +263,7 @@ function renderDiagramCommentOverviewThread(thread, activeThreadId, onOpen) {
     messageCount,
     previewBody: latestMessage?.body || '',
     previewClassName: 'comment-markdown comment-overview-thread-preview comments-drawer-item-preview',
-    quote: thread?.anchorQuote || thread?.anchorSnapshot?.text || 'Diagram element',
+    quote: thread?.anchorQuote || thread?.anchorSnapshot?.text || t('diagram.diagramElement'),
     quoteClassName: 'comment-overview-thread-quote comments-drawer-item-quote',
     timestamp: formatDiagramCommentTimestamp(latestMessage?.createdAt),
   });
@@ -486,6 +493,7 @@ function buildExcalidrawProps({ initialData, renderTopRightUI, viewModeEnabled }
       collabReady = false;
     },
     aiEnabled: false,
+    langCode: getLocale(),
     generateLinkForSelection: (elementId, elementType) => createExcalidrawElementLink(
       currentDocument.filePath,
       elementId,
@@ -538,11 +546,11 @@ function PresentationToolbar() {
     return null;
   }
 
-  const label = context.active ? 'Exit presentation' : 'Start presentation';
+  const label = context.active ? t('diagram.exitPresentation') : t('diagram.startPresentation');
   const icon = context.active ? '×' : '▶';
-  let title = context.active ? 'Exit presentation' : 'Present frames';
+  let title = context.active ? t('diagram.exitPresentation') : t('diagram.presentFrames');
   if (context.frameCount === 0) {
-    title = 'Add a frame to create slides';
+    title = t('diagram.addAFrameToCreateSlides');
   }
 
   return React.createElement('button', {
@@ -565,31 +573,31 @@ function DiagramCommentsToolbar() {
 
   const addCommentButton = context.selectedElement
     ? React.createElement('button', {
-      'aria-label': 'Add comment',
+      'aria-label': t('diagram.addComment'),
       className: 'diagram-comment-add sidebar-trigger',
       'data-testid': 'diagram-add-comment',
       disabled: !context.canWrite,
       key: 'add',
       onClick: context.openComposer,
-      title: context.canWrite ? 'Add comment to selected element' : 'Reconnect to add a comment',
+      title: context.canWrite ? t('diagram.addCommentToSelectedElement') : t('diagram.reconnectToAddAComment'),
       type: 'button',
     }, React.createElement(DiagramCommentIcon, { add: true }))
     : null;
 
   return React.createElement('div', {
-    'aria-label': 'Diagram comments',
+    'aria-label': t('diagram.diagramComments'),
     className: 'diagram-comments-toolbar',
     role: 'toolbar',
   }, [
     addCommentButton,
     React.createElement('button', {
       'aria-expanded': context.drawerOpen,
-      'aria-label': 'Comments',
+      'aria-label': t('diagram.comments'),
       className: `diagram-comment-button sidebar-trigger${context.drawerOpen ? ' active' : ''}`,
       'data-testid': 'diagram-comments-toggle',
       key: 'toggle',
       onClick: context.toggleDrawer,
-      title: context.drawerOpen ? 'Close comments' : 'Open comments',
+      title: context.drawerOpen ? t('diagram.closeComments') : t('diagram.openComments'),
       type: 'button',
     }, [
       React.createElement(DiagramCommentIcon, { key: 'icon' }),
@@ -839,16 +847,16 @@ function DiagramCommentsEditor({ apiId = '', canWrite = false, focusRequest = nu
       className: 'diagram-comment-anchor-label',
       key: 'anchor',
     }, selectedElement
-      ? `On ${formatDiagramAnchorLabel(selectedElement.type, getDiagramElementContent(selectedElement))}`
-      : 'On selected element'),
+      ? t('diagram.onAnchor', { anchor: formatDiagramAnchorLabel(selectedElement.type, getDiagramElementContent(selectedElement)) })
+      : t('diagram.onSelectedElement')),
     React.createElement('textarea', {
-      'aria-label': 'Comment',
+      'aria-label': t('common.comment'),
       autoFocus: true,
       className: 'diagram-comment-input',
       key: 'input',
       maxLength: 2000,
       onChange: (event) => setDraft(event.target.value),
-      placeholder: 'Add context, feedback, or a question…',
+      placeholder: t('diagram.addContextFeedbackOrAQuestion'),
       rows: 4,
       value: draft,
     }),
@@ -861,13 +869,13 @@ function DiagramCommentsEditor({ apiId = '', canWrite = false, focusRequest = nu
         key: 'cancel',
         onClick: () => setComposerOpen(false),
         type: 'button',
-      }, 'Cancel'),
+      }, t('common.cancel')),
       React.createElement('button', {
         className: 'diagram-comment-button is-primary',
         disabled: !draft.trim() || !canWrite,
         key: 'submit',
         type: 'submit',
-      }, 'Post comment'),
+      }, t('diagram.postComment')),
     ]),
   ]);
   const renderThread = () => React.createElement(React.Fragment, null, [
@@ -876,7 +884,7 @@ function DiagramCommentsEditor({ apiId = '', canWrite = false, focusRequest = nu
       key: 'back',
       onClick: () => setActiveThreadId(null),
       type: 'button',
-    }, '← All comments'),
+    }, t('diagram.allComments')),
     React.createElement('p', {
       className: 'diagram-comment-anchor-label',
       key: 'label',
@@ -903,13 +911,13 @@ function DiagramCommentsEditor({ apiId = '', canWrite = false, focusRequest = nu
       onSubmit: submitReply,
     }, [
       React.createElement('textarea', {
-        'aria-label': 'Reply',
+        'aria-label': t('diagram.reply'),
         className: 'diagram-comment-input',
         disabled: !canWrite,
         key: 'reply-input',
         maxLength: 2000,
         onChange: (event) => setReplyDraft(event.target.value),
-        placeholder: canWrite ? 'Reply…' : 'Reconnect to reply',
+        placeholder: canWrite ? t('diagram.reply2') : t('diagram.reconnectToReply'),
         rows: 3,
         value: replyDraft,
       }),
@@ -921,13 +929,13 @@ function DiagramCommentsEditor({ apiId = '', canWrite = false, focusRequest = nu
           className: 'diagram-comment-button is-primary',
           disabled: !replyDraft.trim() || !canWrite,
           type: 'submit',
-        }, 'Reply'),
+        }, t('diagram.reply')),
         React.createElement('button', {
           className: 'diagram-comment-button is-danger',
           disabled: !canWrite,
           onClick: resolveThread,
           type: 'button',
-        }, 'Resolve'),
+        }, t('diagram.resolve')),
       ]),
     ]),
   ]);
@@ -949,26 +957,26 @@ function DiagramCommentsEditor({ apiId = '', canWrite = false, focusRequest = nu
             React.createElement('p', {
               className: 'ui-empty-state-title',
               key: 'title',
-            }, 'No comments yet'),
+            }, t('diagram.noCommentsYet')),
             React.createElement('p', {
               className: 'ui-empty-state-copy',
               key: 'copy',
-            }, 'Select an element and add the first comment.'),
+            }, t('diagram.selectAnElementAndAddTheFirstComment')),
           ]);
     const drawerAddButton = selectedElement && !composerOpen
       ? React.createElement('button', {
-        'aria-label': 'Add comment',
+        'aria-label': t('diagram.addComment'),
         className: 'diagram-comment-add',
         disabled: !canWrite,
         key: 'add',
         onClick: openComposer,
-        title: canWrite ? 'Add comment to selected element' : 'Reconnect to add a comment',
+        title: canWrite ? t('diagram.addCommentToSelectedElement') : t('diagram.reconnectToAddAComment'),
         type: 'button',
       }, React.createElement(DiagramCommentIcon, { add: true }))
       : null;
 
     return React.createElement('aside', {
-      'aria-label': 'Diagram comments',
+      'aria-label': t('diagram.diagramComments'),
       className: 'diagram-comments-drawer',
       'data-testid': 'diagram-comments-drawer',
     }, [
@@ -979,14 +987,14 @@ function DiagramCommentsEditor({ apiId = '', canWrite = false, focusRequest = nu
         React.createElement('span', {
           className: 'comments-drawer-title',
           key: 'title',
-        }, composerOpen ? 'New comment' : activeThread ? 'Comment thread' : 'Comments'),
+        }, composerOpen ? t('diagram.newComment') : activeThread ? t('diagram.commentThread') : t('diagram.comments')),
         React.createElement('div', {
           className: 'diagram-comments-drawer-header-actions',
           key: 'actions',
         }, [
           drawerAddButton,
           React.createElement('button', {
-            'aria-label': 'Close comments',
+            'aria-label': t('diagram.closeComments'),
             className: 'diagram-comment-close',
             key: 'close',
             onClick: () => setDrawerOpen(false),
@@ -1152,9 +1160,9 @@ function handleHistoryAction({ action = '', outcome = '' } = {}) {
     return;
   }
 
-  const label = action === 'redo' ? 'Redo' : 'Undo';
+  const label = action === 'redo' ? t('common.redo') : t('common.undo');
   api.setToast?.({
-    message: `${label} skipped: a collaborator changed that item`,
+    message: t('diagram.labelSkippedACollaboratorChangedThatItem', { label }),
   });
 }
 
@@ -1186,7 +1194,7 @@ function handleRoomConnectionStateChange({
     roomConnectionState === EXCALIDRAW_ROOM_CONNECTION_STATE.AUTHORITATIVE
     && previousState === EXCALIDRAW_ROOM_CONNECTION_STATE.RECONNECTING_READONLY
   ) {
-    getMountedExcalidrawAPI()?.setToast?.({ message: 'Live diagram reconnected' });
+    getMountedExcalidrawAPI()?.setToast?.({ message: t('diagram.liveDiagramReconnected') });
   }
 
   if (roomConnectionState === EXCALIDRAW_ROOM_CONNECTION_STATE.AUTHORITATIVE) {
@@ -2244,6 +2252,9 @@ async function init() {
   const loadingElement = document.getElementById('loadingState');
 
   try {
+    initializeI18n();
+    applyDocumentLocale();
+    localizeDocument();
     applySurfaceTheme(currentTheme);
     applyDocumentMode();
     await ensureClientAuthenticated();
@@ -2259,12 +2270,14 @@ async function init() {
   } catch (error) {
     console.error('[excalidraw] Failed to initialize:', error);
     postToParent('error', {
-      message: error instanceof Error ? error.message : 'Failed to load Excalidraw',
+      message: error instanceof Error ? error.message : t('diagram.failedToLoadExcalidraw'),
     });
 
     if (loadingElement) {
       loadingElement.className = 'loading-state error';
-      loadingElement.textContent = `Failed to load Excalidraw: ${error instanceof Error ? error.message : String(error)}`;
+      loadingElement.textContent = t('diagram.failedToLoadExcalidrawMessage', {
+        message: error instanceof Error ? error.message : String(error),
+      });
     }
   }
 }

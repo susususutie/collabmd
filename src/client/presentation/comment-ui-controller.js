@@ -3,6 +3,7 @@ import { commentUiLayoutMethods } from './comment-ui/comment-ui-layout.js';
 import { commentUiRenderMethods } from './comment-ui/comment-ui-render.js';
 import { commentUiStateMethods } from './comment-ui/comment-ui-state.js';
 import { createPreviewSelection, isTextSelectionAnchor } from './comment-ui/comment-ui-shared.js';
+import { getLocale } from '../i18n/index.js';
 
 export class CommentUiController {
   constructor({
@@ -65,7 +66,7 @@ export class CommentUiController {
     this.reactionPicker = null;
     this.listenerController = null;
     this.layoutFrame = 0;
-    this.timeFormatter = new Intl.DateTimeFormat(undefined, {
+    this.timeFormatter = new Intl.DateTimeFormat(getLocale(), {
       day: 'numeric',
       hour: 'numeric',
       minute: '2-digit',

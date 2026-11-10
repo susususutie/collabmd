@@ -1,6 +1,7 @@
 import { resolveApiUrl } from '../domain/runtime-paths.js';
 import { isPdfFilePath } from '../../domain/file-kind.js';
 import { getVaultPathLeaf } from '../domain/vault-paths.js';
+import { t, translateServerMessage } from '../i18n/index.js';
 import { createRequestHeaders, parseApiResponse } from './api-client-utils.js';
 import { downloadBlob, parseDownloadFileName } from '../browser-utils.js';
 
@@ -30,7 +31,7 @@ async function triggerDownload(url, {
 export const vaultApiClient = {
   async readTree(config) {
     const response = await fetch(resolveApiUrl('/files', config));
-    return parseApiResponse(response, 'Failed to load file tree');
+    return parseApiResponse(response, 'api.failedToLoadFileTree');
   },
   async callAgentTool(name, input, { signal } = {}) {
     const response = await fetch(resolveApiUrl(`/agent/tools/${encodeURIComponent(name)}`), {
@@ -39,17 +40,17 @@ export const vaultApiClient = {
       method: 'POST',
       signal,
     });
-    return parseApiResponse(response, `Failed to execute ${name}`);
+    return parseApiResponse(response, 'api.failedToExecuteName', { name: name });
   },
 
   async readCommentOverview() {
     const response = await fetch(resolveApiUrl('/comments/overview'));
-    return parseApiResponse(response, 'Failed to load comment overview');
+    return parseApiResponse(response, 'api.failedToLoadCommentOverview');
   },
 
   async readFile(path, config) {
     const response = await fetch(resolveApiUrl(`/file?path=${encodeURIComponent(path)}`, config));
-    return parseApiResponse(response, 'Failed to read file');
+    return parseApiResponse(response, 'api.failedToReadFile');
   },
 
   async readBacklinks(filePath, { signal } = {}) {
@@ -57,7 +58,7 @@ export const vaultApiClient = {
       resolveApiUrl(`/backlinks?file=${encodeURIComponent(filePath)}`),
       { signal },
     );
-    const data = await parseApiResponse(response, 'Failed to load backlinks');
+    const data = await parseApiResponse(response, 'api.failedToLoadBacklinks');
     return Array.isArray(data.backlinks) ? data.backlinks : [];
   },
 
@@ -72,7 +73,7 @@ export const vaultApiClient = {
       },
       method: 'POST',
     });
-    return parseApiResponse(response, 'Failed to sync Structurizr workspace');
+    return parseApiResponse(response, 'api.failedToSyncStructurizrWorkspace');
   },
 
   async renderSvg(source) {
@@ -83,9 +84,9 @@ export const vaultApiClient = {
       },
       method: 'POST',
     });
-    const data = await parseApiResponse(response, 'Failed to render PlantUML');
+    const data = await parseApiResponse(response, 'api.failedToRenderPlantuml');
     if (!data.ok || typeof data.svg !== 'string') {
-      throw new Error(data.error || 'Failed to render PlantUML');
+      throw new Error(data.error ? translateServerMessage(data.error) : t('api.failedToRenderPlantuml'));
     }
 
     return data.svg;
@@ -99,7 +100,7 @@ export const vaultApiClient = {
     const response = await fetch(resolveApiUrl(`/search?${searchParams.toString()}`), {
       signal,
     });
-    return parseApiResponse(response, 'Failed to search files');
+    return parseApiResponse(response, 'api.failedToSearchFiles');
   },
 
   async queryBase({
@@ -122,7 +123,7 @@ export const vaultApiClient = {
       headers: { 'Content-Type': 'application/json' },
       method: 'POST',
     });
-    return parseApiResponse(response, 'Failed to query base');
+    return parseApiResponse(response, 'api.failedToQueryBase');
   },
 
   async exportBaseCsv({
@@ -178,7 +179,7 @@ export const vaultApiClient = {
       headers: { 'Content-Type': 'application/json' },
       method: 'POST',
     });
-    return parseApiResponse(response, 'Failed to load base property values');
+    return parseApiResponse(response, 'api.failedToLoadBasePropertyValues');
   },
 
   async transformBase({
@@ -201,7 +202,7 @@ export const vaultApiClient = {
       headers: { 'Content-Type': 'application/json' },
       method: 'POST',
     });
-    return parseApiResponse(response, 'Failed to transform base');
+    return parseApiResponse(response, 'api.failedToTransformBase');
   },
 
   async createFile({ content, path, requestId = null }) {
@@ -210,7 +211,7 @@ export const vaultApiClient = {
       headers: createRequestHeaders(requestId, { 'Content-Type': 'application/json' }),
       method: 'POST',
     });
-    return parseApiResponse(response, 'Failed to create file');
+    return parseApiResponse(response, 'api.failedToCreateFile');
   },
 
   async writeFile({ content, path, requestId = null }) {
@@ -219,7 +220,7 @@ export const vaultApiClient = {
       headers: createRequestHeaders(requestId, { 'Content-Type': 'application/json' }),
       method: 'PUT',
     });
-    return parseApiResponse(response, 'Failed to write file');
+    return parseApiResponse(response, 'api.failedToWriteFile');
   },
 
   async renameFile({ oldPath, newPath, requestId = null }) {
@@ -228,7 +229,7 @@ export const vaultApiClient = {
       headers: createRequestHeaders(requestId, { 'Content-Type': 'application/json' }),
       method: 'PATCH',
     });
-    return parseApiResponse(response, 'Failed to rename file');
+    return parseApiResponse(response, 'api.failedToRenameFile');
   },
 
   async deleteFile(path, { requestId = null } = {}) {
@@ -236,7 +237,7 @@ export const vaultApiClient = {
       headers: requestId ? createRequestHeaders(requestId) : undefined,
       method: 'DELETE',
     });
-    return parseApiResponse(response, 'Failed to delete file');
+    return parseApiResponse(response, 'api.failedToDeleteFile');
   },
 
   async createDirectory(path, { requestId = null } = {}) {
@@ -245,7 +246,7 @@ export const vaultApiClient = {
       headers: createRequestHeaders(requestId, { 'Content-Type': 'application/json' }),
       method: 'POST',
     });
-    return parseApiResponse(response, 'Failed to create folder');
+    return parseApiResponse(response, 'api.failedToCreateFolder');
   },
 
   async renameDirectory({ oldPath, newPath, requestId = null }) {
@@ -254,7 +255,7 @@ export const vaultApiClient = {
       headers: createRequestHeaders(requestId, { 'Content-Type': 'application/json' }),
       method: 'PATCH',
     });
-    return parseApiResponse(response, 'Failed to rename folder');
+    return parseApiResponse(response, 'api.failedToRenameFolder');
   },
 
   async deleteDirectory(path, { recursive = false, requestId = null } = {}) {
@@ -269,7 +270,7 @@ export const vaultApiClient = {
       headers: requestId ? createRequestHeaders(requestId) : undefined,
       method: 'DELETE',
     });
-    return parseApiResponse(response, 'Failed to delete folder');
+    return parseApiResponse(response, 'api.failedToDeleteFolder');
   },
 
   async uploadImageAttachment({ file, fileName = '', sourcePath }) {
@@ -282,7 +283,7 @@ export const vaultApiClient = {
       },
       method: 'POST',
     });
-    return parseApiResponse(response, 'Failed to upload image');
+    return parseApiResponse(response, 'api.failedToUploadImage');
   },
 
   async uploadFile({ file, path, requestId = null }) {
@@ -294,13 +295,13 @@ export const vaultApiClient = {
       }),
       method: 'POST',
     });
-    return parseApiResponse(response, 'Failed to upload file');
+    return parseApiResponse(response, 'api.failedToUploadFile');
   },
 
   async downloadFile(path) {
     const fallbackFileName = getVaultPathLeaf(path) || 'download';
     return triggerDownload(resolveApiUrl(`/download/file?path=${encodeURIComponent(path)}`), {
-      fallbackError: 'Failed to download file',
+      fallbackError: 'api.failedToDownloadFile',
       fallbackFileName,
     });
   },
@@ -308,7 +309,7 @@ export const vaultApiClient = {
   async downloadDirectory(path) {
     const directoryName = getVaultPathLeaf(path) || 'vault';
     return triggerDownload(resolveApiUrl(`/download/directory?path=${encodeURIComponent(path)}`), {
-      fallbackError: 'Failed to download folder',
+      fallbackError: 'api.failedToDownloadFolder',
       fallbackFileName: `${directoryName}.zip`,
     });
   },

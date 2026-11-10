@@ -1,3 +1,4 @@
+import { t } from '../i18n/index.js';
 import {
   cancelIdleRender,
   createDiagramErrorPlaceholderCard,
@@ -318,7 +319,7 @@ export class DiagramPreviewHydrator {
       kind,
       label: this.getShellLabel(shell),
       message,
-      subtitle: 'Showing the last valid result.',
+      subtitle: t('preview.showingTheLastValidResult'),
     }));
     this.notifyShellLayoutChange();
     return true;

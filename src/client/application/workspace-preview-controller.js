@@ -9,6 +9,7 @@ import {
 import { canFormatDocument } from '../domain/document-formatter.js';
 import { setDiagramActionButtonIcon } from '../domain/diagram-action-icons.js';
 import { resolveApiUrl } from '../domain/runtime-paths.js';
+import { t } from '../i18n/index.js';
 
 const HTML_PREVIEW_CSP = "default-src 'none'; base-uri about:; form-action 'none'; object-src 'none'; frame-src 'none'; worker-src 'none'; connect-src 'none'; style-src 'unsafe-inline'; img-src data: blob:; font-src data:; media-src data: blob:";
 
@@ -28,12 +29,12 @@ function hasHtmlScripts(content) {
 
 function syncFormatDocumentButton(button, filePath, isPlantUml) {
   if (!button) return;
-  const actionLabel = isPlantUml ? 'Indent PlantUML document' : 'Format document';
+  const actionLabel = isPlantUml ? t('app.indentPlantumlDocument') : t('app.formatDocument');
   button.classList.toggle('hidden', !canFormatDocument(filePath));
   button.setAttribute('aria-label', actionLabel);
   button.setAttribute('title', actionLabel);
   const label = button.querySelector('.ui-action-label');
-  if (label) label.textContent = isPlantUml ? 'Indent' : 'Format';
+  if (label) label.textContent = isPlantUml ? t('app.indent') : t('app.format');
 }
 
 export class WorkspacePreviewController {
@@ -140,7 +141,7 @@ export class WorkspacePreviewController {
     const button = this.elements.htmlPreviewMaximizeButton;
     if (button) {
       setDiagramActionButtonIcon(button, isMaximized ? 'restore' : 'maximize');
-      button.title = isMaximized ? 'Restore HTML preview' : 'Maximize HTML preview';
+      button.title = isMaximized ? t('app.restoreHtmlPreview') : t('app.maximizeHtmlPreview');
       button.setAttribute('aria-label', button.title);
     }
   }
@@ -260,7 +261,7 @@ export class WorkspacePreviewController {
     placeholder.dataset.embedTarget = filePath;
     const loadingShell = document.createElement('div');
     loadingShell.className = 'preview-shell';
-    loadingShell.textContent = 'Loading Excalidraw preview…';
+    loadingShell.textContent = t('app.loadingExcalidrawPreview');
     placeholder.appendChild(loadingShell);
     this.commitFilePreview(renderHost, placeholder);
 
@@ -289,7 +290,7 @@ export class WorkspacePreviewController {
     placeholder.dataset.drawioTarget = filePath;
     const loadingShell = document.createElement('div');
     loadingShell.className = 'preview-shell';
-    loadingShell.textContent = 'Loading draw.io preview…';
+    loadingShell.textContent = t('app.loadingDrawIoPreview');
     placeholder.appendChild(loadingShell);
 
     this.commitFilePreview(renderHost, placeholder);
@@ -359,7 +360,7 @@ export class WorkspacePreviewController {
     const source = String(content ?? '');
     const iframe = document.createElement('iframe');
     iframe.className = 'html-file-preview-frame';
-    iframe.title = 'HTML preview';
+    iframe.title = t('app.htmlPreview');
     iframe.referrerPolicy = 'no-referrer';
     iframe.setAttribute('allow', "camera 'none'; microphone 'none'; geolocation 'none'; clipboard-read 'none'; clipboard-write 'none'");
     iframe.setAttribute('sandbox', '');
@@ -372,12 +373,12 @@ export class WorkspacePreviewController {
     if (hasHtmlScripts(source)) {
       const scriptGate = document.createElement('div');
       scriptGate.className = 'html-file-preview-script-gate';
-      scriptGate.textContent = 'Scripts are disabled by default. Run them only if you trust this HTML file.';
+      scriptGate.textContent = t('app.scriptsAreDisabledByDefaultRunThemOnlyIfYouTrust');
 
       const runScriptsButton = document.createElement('button');
       runScriptsButton.type = 'button';
       runScriptsButton.className = 'ui-button ui-button--secondary ui-button--compact';
-      runScriptsButton.textContent = 'Run scripts';
+      runScriptsButton.textContent = t('app.runScripts');
       runScriptsButton.addEventListener('click', () => {
         iframe.setAttribute('sandbox', 'allow-scripts');
         iframe.srcdoc = createHtmlPreviewDocument(source, true);

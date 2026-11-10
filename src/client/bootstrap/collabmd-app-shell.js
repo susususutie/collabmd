@@ -1,3 +1,4 @@
+import { t } from '../i18n/index.js';
 import { PdfPreviewController } from '../application/pdf-preview-controller.js';
 import { analyzeMarkdownComplexity, isLargeDocumentStats } from '../application/preview-render-profile.js';
 import { PreviewRenderer } from '../application/preview-renderer.js';
@@ -229,7 +230,7 @@ export class CollabMdAppShell {
       },
       getIsTabActive: () => this.isTabActive,
       onDidMutate: () => {
-        this.toastController.show('Agent-assisted Vault change applied. Review it before committing.');
+        this.toastController.show(t('app.agentAssistedVaultChangeAppliedReviewItBefore'));
       },
       prepareToolCall: async ({ input, name, signal }) => {
         if (
@@ -787,8 +788,8 @@ export class CollabMdAppShell {
   set currentFilePath(value) {
     this._currentFilePath = value;
     document.title = value
-      ? `${this.getDisplayName(value)} — CollabMD`
-      : 'CollabMD — Collaborative Markdown Vault';
+      ? t('app.nameCollabmd', { name: this.getDisplayName(value) })
+      : t('app.collabmdCollaborativeMarkdownVault');
   }
 
   get session() { return this._session; }

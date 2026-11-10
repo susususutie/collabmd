@@ -8,6 +8,12 @@ import { createCanvasMarkdownPreview } from './bootstrap/canvas-markdown-preview
 import { canvasFilePath } from './domain/canvas-view.js';
 import { getActiveVaultId, getClientRuntimeConfig, resolveApiUrl, resolveWsBaseUrl } from './domain/runtime-paths.js';
 import { ensureClientAuthenticated } from './infrastructure/auth-client.js';
+import {
+  applyDocumentLocale,
+  initializeI18n,
+  localizeDocument,
+  t,
+} from './i18n/index.js';
 import { CanvasRoomClient } from './infrastructure/canvas-room-client.js';
 import { createCanvasTextEditor } from './infrastructure/canvas-text-editor.js';
 import { vaultApiClient } from './infrastructure/vault-api-client.js';
@@ -35,6 +41,9 @@ function updateTheme(theme) {
 }
 
 async function initialize() {
+  initializeI18n();
+  applyDocumentLocale();
+  localizeDocument();
   updateTheme(params.get('theme'));
   await ensureClientAuthenticated();
   if (!filePath || !/\.canvas$/i.test(filePath)) throw new Error('Choose a valid Canvas file from the Vault.');
@@ -138,6 +147,6 @@ async function initialize() {
 }
 
 initialize().catch(() => {
-  root.textContent = 'Unable to open this canvas. The file has not been changed.';
+  root.textContent = t('canvas.unableToOpenThisCanvasTheFileHasNotBeenChanged');
   root.setAttribute('role', 'alert');
 });

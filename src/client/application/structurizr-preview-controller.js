@@ -1,3 +1,4 @@
+import { t } from '../i18n/index.js';
 import { resolveAppPath } from '../domain/runtime-paths.js';
 import { setDiagramActionButtonIcon } from '../domain/diagram-action-icons.js';
 
@@ -202,7 +203,7 @@ export class StructurizrPreviewController {
   createIframe() {
     const iframe = document.createElement('iframe');
     iframe.className = 'structurizr-preview-iframe';
-    iframe.title = 'Structurizr architecture diagram';
+    iframe.title = t('preview.structurizrArchitectureDiagram');
     iframe.loading = 'eager';
     iframe.referrerPolicy = 'same-origin';
     iframe.addEventListener('load', this.handleFrameLoad);

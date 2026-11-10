@@ -1,3 +1,4 @@
+import { t } from '../i18n/index.js';
 import { createDrawioLeaseRoomName } from '../../domain/drawio-room.js';
 import { setDiagramActionButtonIcon } from '../domain/diagram-action-icons.js';
 import { getActiveVaultId, resolveAppUrl } from '../domain/runtime-paths.js';
@@ -323,7 +324,7 @@ export class DrawioEmbedController {
 
     const loadingShell = document.createElement('div');
     loadingShell.className = 'preview-shell';
-    loadingShell.textContent = 'Rendering draw.io preview…';
+    loadingShell.textContent = t('diagram.renderingDrawIoPreview');
     viewerShell.appendChild(loadingShell);
 
     wrapper.append(header, viewerShell);
@@ -336,7 +337,7 @@ export class DrawioEmbedController {
       await this.renderViewerEntry(entry);
       this.syncEntryLayout(entry);
     } catch (error) {
-      this.renderViewerFallback(entry, error instanceof Error ? error.message : 'Failed to render draw.io preview');
+      this.renderViewerFallback(entry, error instanceof Error ? error.message : t('diagram.failedToRenderDrawIoPreview'));
       this.syncEntryLayout(entry);
     }
   }
@@ -351,7 +352,7 @@ export class DrawioEmbedController {
     const theme = this.getTheme?.() === 'light' ? 'light' : 'dark';
     const viewerHost = entry.wrapper.querySelector('.drawio-viewer-shell') ?? entry.viewerElement;
     entry.viewerElement = await renderDrawioViewer(viewerHost, {
-      ariaLabel: `Open ${entry.label.replace(/\.drawio$/i, '')}`,
+      ariaLabel: t('diagram.openName', { name: entry.label.replace(/\.drawio$/i, '') }),
       className: 'mxgraph drawio-viewer-frame',
       onActivate: () => this.onOpenFile?.(entry.filePath),
       source: String(content ?? ''),
@@ -396,7 +397,7 @@ export class DrawioEmbedController {
 
       if (entry.mode === 'view' && entry.wrapper?.isConnected && entry.viewerElement?.isConnected) {
         void this.renderViewerEntry(entry).catch((error) => {
-          this.renderViewerFallback(entry, error instanceof Error ? error.message : 'Failed to render draw.io preview');
+          this.renderViewerFallback(entry, error instanceof Error ? error.message : t('diagram.failedToRenderDrawIoPreview'));
         });
       }
     });
@@ -493,7 +494,7 @@ export class DrawioEmbedController {
     }
 
     if (entry.iframe) {
-      entry.iframe.title = `draw.io: ${entry.filePath}`;
+      entry.iframe.title = t('diagram.drawIoPath', { path: entry.filePath });
     }
   }
 
@@ -563,8 +564,8 @@ export class DrawioEmbedController {
     button.className = 'drawio-embed-btn ui-preview-action ui-preview-action--icon-only';
     button.dataset.action = 'open-file';
     button.dataset.filePath = entry.filePath;
-    button.title = 'Edit in draw.io';
-    button.setAttribute('aria-label', 'Edit in draw.io');
+    button.title = t('diagram.editInDrawIo');
+    button.setAttribute('aria-label', t('diagram.editInDrawIo'));
     setDiagramActionButtonIcon(button, 'edit');
     button.addEventListener('click', (event) => {
       event.preventDefault();
@@ -584,8 +585,8 @@ export class DrawioEmbedController {
     const syncState = () => {
       const isMaximized = this.maximizedEntry?.key === entry.key;
       setDiagramActionButtonIcon(button, isMaximized ? 'restore' : 'maximize');
-      button.title = isMaximized ? 'Restore diagram size' : 'Maximize diagram';
-      button.setAttribute('aria-label', isMaximized ? 'Restore diagram size' : 'Maximize diagram');
+      button.title = isMaximized ? t('diagram.restoreDiagramSize') : t('diagram.maximizeDiagram');
+      button.setAttribute('aria-label', isMaximized ? t('diagram.restoreDiagramSize') : t('diagram.maximizeDiagram'));
     };
 
     button.addEventListener('click', (event) => {
@@ -668,8 +669,8 @@ export class DrawioEmbedController {
 
       const isMaximized = this.maximizedEntry?.key === entry.key;
       setDiagramActionButtonIcon(button, isMaximized ? 'restore' : 'maximize');
-      button.title = isMaximized ? 'Restore diagram size' : 'Maximize diagram';
-      button.setAttribute('aria-label', isMaximized ? 'Restore diagram size' : 'Maximize diagram');
+      button.title = isMaximized ? t('diagram.restoreDiagramSize') : t('diagram.maximizeDiagram');
+      button.setAttribute('aria-label', isMaximized ? t('diagram.restoreDiagramSize') : t('diagram.maximizeDiagram'));
     });
   }
 
@@ -707,7 +708,7 @@ export class DrawioEmbedController {
 
     if (payload.type === 'fallback-text') {
       if (entry.mode === 'view') {
-        this.renderViewerFallback(entry, 'Failed to render draw.io preview');
+        this.renderViewerFallback(entry, t('diagram.failedToRenderDrawIoPreview'));
         return;
       }
       this.onOpenTextFile?.(entry.filePath);
@@ -716,7 +717,7 @@ export class DrawioEmbedController {
 
     if (payload.type === 'error') {
       if (entry.mode === 'view') {
-        this.renderViewerFallback(entry, payload.message || 'Failed to load draw.io preview');
+        this.renderViewerFallback(entry, payload.message || t('diagram.failedToLoadDrawIoPreview'));
         return;
       }
       this.toastController?.show?.(payload.message || 'Failed to load draw.io');

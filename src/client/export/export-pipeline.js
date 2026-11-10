@@ -1,3 +1,4 @@
+import { t } from '../i18n/index.js';
 import baseStyles from '../styles/base.css?inline';
 import tokenStyles from '../styles/foundation/tokens.css?inline';
 import themeStyles from '../styles/foundation/themes.css?inline';
@@ -474,7 +475,7 @@ async function fetchJson(url, init = {}) {
     },
     ...init,
   });
-  return parseApiResponse(response, `Request failed: ${response.status}`);
+  return parseApiResponse(response, 'export.requestFailedStatus', { status: response.status });
 }
 
 async function fetchTextFile(filePath) {
@@ -579,7 +580,7 @@ function createVideoPosterElement(element, {
     media.className = 'export-video-poster-media';
 
     const image = document.createElement('img');
-    image.alt = `${element.dataset.videoEmbedLabel || 'Embedded video'} poster`;
+    image.alt = t('export.labelPoster', { label: element.dataset.videoEmbedLabel || t('export.embeddedVideo') });
     image.className = 'export-video-poster-image';
     image.src = posterDataUrl;
     image.setAttribute('data-export-docx-src', docxPosterDataUrl || posterDataUrl);
@@ -588,7 +589,7 @@ function createVideoPosterElement(element, {
     const badge = document.createElement('span');
     badge.className = 'export-video-play-badge';
     badge.setAttribute('aria-hidden', 'true');
-    badge.textContent = 'Play';
+    badge.textContent = t('export.play');
     media.appendChild(badge);
 
     card.appendChild(media);
@@ -598,11 +599,11 @@ function createVideoPosterElement(element, {
   copy.className = 'export-video-poster-copy';
 
   const title = document.createElement('strong');
-  title.textContent = element.dataset.videoEmbedLabel || 'Embedded video';
+  title.textContent = element.dataset.videoEmbedLabel || t('export.embeddedVideo');
 
   const meta = document.createElement('span');
   meta.className = 'export-video-poster-meta';
-  meta.textContent = element.dataset.videoEmbedKind === 'youtube' ? 'YouTube video' : 'Video link';
+  meta.textContent = element.dataset.videoEmbedKind === 'youtube' ? t('export.youtubeVideo') : t('export.videoLink');
 
   copy.append(title, meta);
   card.appendChild(copy);
@@ -782,7 +783,7 @@ function createImageFallbackElement({
 } = {}) {
   const fallback = document.createElement('span');
   fallback.className = 'export-warning export-image-fallback';
-  fallback.textContent = message || 'Image export failed';
+  fallback.textContent = message || t('export.imageExportFailed');
 
   if (!src) {
     return fallback;
@@ -1091,10 +1092,10 @@ async function resolveBaseEmbed(snapshot, placeholder) {
   const toolbarMain = document.createElement('div');
   toolbarMain.className = 'bases-toolbar-main';
   const title = document.createElement('strong');
-  title.textContent = result.view?.name || 'Base view';
+  title.textContent = result.view?.name || t('export.baseView');
   const meta = document.createElement('div');
   meta.className = 'bases-meta';
-  meta.textContent = `${result.totalRows ?? 0} results`;
+  meta.textContent = t('export.countResults', { count: result.totalRows ?? 0 });
   toolbarMain.append(title, meta);
   toolbar.appendChild(toolbarMain);
   shell.appendChild(toolbar);
@@ -1268,7 +1269,7 @@ export async function resolveExportAssets(snapshot, {
     try {
       await resolveVideoPoster(snapshot, shell);
     } catch (error) {
-      snapshot.warnings.push(error instanceof Error ? error.message : 'Failed to render video poster');
+      snapshot.warnings.push(error instanceof Error ? error.message : t('export.failedToRenderVideoPoster'));
       shell.replaceWith(createVideoPosterElement(shell));
     }
   }
@@ -1282,10 +1283,10 @@ export async function resolveExportAssets(snapshot, {
         render: (source) => renderMermaidToSvgMarkup(source),
       });
     } catch (error) {
-      snapshot.warnings.push(error instanceof Error ? error.message : 'Failed to render Mermaid diagram');
+      snapshot.warnings.push(error instanceof Error ? error.message : t('export.failedToRenderMermaidDiagram'));
       shell.replaceWith(Object.assign(document.createElement('p'), {
         className: 'export-warning',
-        textContent: `Mermaid export failed: ${error instanceof Error ? error.message : 'Unknown error'}`,
+        textContent: t('export.mermaidExportFailedMessage', { message: error instanceof Error ? error.message : t('export.unknownError') }),
       }));
     }
   }
@@ -1299,10 +1300,10 @@ export async function resolveExportAssets(snapshot, {
         render: (source) => renderPlantUmlToSvgMarkup(source),
       });
     } catch (error) {
-      snapshot.warnings.push(error instanceof Error ? error.message : 'Failed to render PlantUML diagram');
+      snapshot.warnings.push(error instanceof Error ? error.message : t('export.failedToRenderPlantumlDiagram'));
       shell.replaceWith(Object.assign(document.createElement('p'), {
         className: 'export-warning',
-        textContent: `PlantUML export failed: ${error instanceof Error ? error.message : 'Unknown error'}`,
+        textContent: t('export.plantumlExportFailedMessage', { message: error instanceof Error ? error.message : t('export.unknownError') }),
       }));
     }
   }
@@ -1312,7 +1313,7 @@ export async function resolveExportAssets(snapshot, {
     try {
       await resolveBaseEmbed(snapshot, placeholder);
     } catch (error) {
-      const message = error instanceof Error ? error.message : 'Unknown error';
+      const message = error instanceof Error ? error.message : t('export.unknownError');
       snapshot.warnings.push(`Base export failed: ${message}`);
       placeholder.replaceWith(Object.assign(document.createElement('p'), {
         className: 'export-warning',
@@ -1326,10 +1327,10 @@ export async function resolveExportAssets(snapshot, {
     try {
       await resolveExcalidrawEmbed(snapshot, placeholder);
     } catch (error) {
-      snapshot.warnings.push(error instanceof Error ? error.message : 'Failed to render Excalidraw diagram');
+      snapshot.warnings.push(error instanceof Error ? error.message : t('export.failedToRenderExcalidrawDiagram'));
       placeholder.replaceWith(Object.assign(document.createElement('p'), {
         className: 'export-warning',
-        textContent: `Excalidraw export failed: ${error instanceof Error ? error.message : 'Unknown error'}`,
+        textContent: t('export.excalidrawExportFailedMessage', { message: error instanceof Error ? error.message : t('export.unknownError') }),
       }));
     }
   }
@@ -1339,10 +1340,10 @@ export async function resolveExportAssets(snapshot, {
     try {
       await resolveDrawioEmbed(snapshot, placeholder);
     } catch (error) {
-      snapshot.warnings.push(error instanceof Error ? error.message : 'Failed to render draw.io diagram');
+      snapshot.warnings.push(error instanceof Error ? error.message : t('export.failedToRenderDrawIoDiagram'));
       placeholder.replaceWith(Object.assign(document.createElement('p'), {
         className: 'export-warning',
-        textContent: `draw.io export failed: ${error instanceof Error ? error.message : 'Unknown error'}`,
+        textContent: t('export.drawIoExportFailedMessage', { message: error instanceof Error ? error.message : t('export.unknownError') }),
       }));
     }
   }
@@ -1694,7 +1695,7 @@ export function buildDocxHtmlDocument(snapshot) {
 
     if (posterImage instanceof HTMLImageElement) {
       const image = document.createElement('img');
-      image.alt = posterImage.alt || title?.textContent || 'Embedded video poster';
+      image.alt = posterImage.alt || title?.textContent || t('export.embeddedVideoPoster');
       image.className = 'export-video-poster-image';
       image.src = posterImage.getAttribute('data-export-docx-src') || posterImage.getAttribute('src') || '';
       replacement.appendChild(image);

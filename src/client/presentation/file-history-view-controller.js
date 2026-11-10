@@ -1,5 +1,7 @@
 import { escapeHtml } from '../domain/vault-utils.js';
+import { formatRelativeDateLabel } from '../domain/git-labels.js';
 import { getVaultPathLeaf, getVaultPathParent } from '../domain/vault-paths.js';
+import { t } from '../i18n/index.js';
 import { buttonClassNames } from './components/ui/button.js';
 
 const HISTORY_PAGE_SIZE = 30;
@@ -19,12 +21,12 @@ function renderHistoryTitle(filePath = '') {
 
 function renderCommitSubtitle(commit = {}) {
   const parts = [
-    String(commit.authorName || 'Unknown'),
-    String(commit.relativeDateLabel || ''),
+    String(commit.authorName || t('common.unknown')),
+    String(formatRelativeDateLabel(commit.authoredAt) || commit.relativeDateLabel || ''),
   ];
 
   if (commit.status === 'renamed' && commit.oldPath) {
-    parts.push(`Renamed from ${commit.oldPath}`);
+    parts.push(t('file.renamedFromPath', { path: commit.oldPath }));
   }
 
   return parts.filter(Boolean).map((part) => escapeHtml(part)).join(' · ');
@@ -186,7 +188,7 @@ export class FileHistoryViewController {
       entries.push({
         ...this.localChanges,
         key: 'local',
-        label: 'Local changes',
+        label: t('file.localChanges'),
         pathAtCommit: this.currentFilePath,
         type: 'local',
       });
@@ -278,11 +280,11 @@ export class FileHistoryViewController {
       };
     } catch (error) {
       console.error('[file-history] Failed to load file history:', error);
-      this.toastController?.show('Failed to load file history');
+      this.toastController?.show(t('file.failedToLoadFileHistory'));
       this.localChanges = null;
       this.history = {
         ...createEmptyHistoryState(),
-        error: 'Failed to load file history',
+        error: t('file.failedToLoadFileHistory'),
         loaded: true,
       };
       this.render();
@@ -401,7 +403,7 @@ export class FileHistoryViewController {
       return detail;
     } catch (error) {
       console.error('[file-history] Failed to load selected diff:', error);
-      this.toastController?.show(entry.type === 'local' ? 'Failed to load local diff' : 'Failed to load commit diff');
+      this.toastController?.show(entry.type === 'local' ? t('file.failedToLoadLocalDiff') : t('file.failedToLoadCommitDiff'));
       this.detailErrors.set(key, entry.type === 'local' ? 'Failed to load local diff' : 'Failed to load commit diff');
       if (requestToken === this.selectionRequestToken && this.selectedEntryKey === key) {
         this.loadingEntryKey = null;
@@ -437,10 +439,10 @@ export class FileHistoryViewController {
       this.render();
     } catch (error) {
       console.error('[file-history] Failed to load more history:', error);
-      this.toastController?.show('Failed to load file history');
+      this.toastController?.show(t('file.failedToLoadFileHistory'));
       this.history = {
         ...this.history,
-        error: 'Failed to load file history',
+        error: t('file.failedToLoadFileHistory'),
         loadingMore: false,
       };
       this.render();
@@ -500,7 +502,7 @@ export class FileHistoryViewController {
 
     return `
       ${this.renderDiffFileHeader(file)}
-      <div class="diff-empty-state">Diff renderer unavailable.</div>
+      <div class="diff-empty-state">${t('file.diffRendererUnavailable')}</div>
     `;
   }
 
@@ -525,10 +527,10 @@ export class FileHistoryViewController {
 
     if (this.fileIndicator) {
       this.fileIndicator.textContent = selectedEntry?.type === 'commit'
-        ? (selectedEntry.shortHash || 'Commit')
+        ? (selectedEntry.shortHash || t('file.commit'))
         : selectedEntry?.type === 'local'
-          ? 'Local changes'
-          : 'History';
+          ? t('file.localChanges')
+          : t('common.history');
     }
 
     if (this.stats) {
@@ -557,7 +559,7 @@ export class FileHistoryViewController {
     });
     this.openEditorButton?.toggleAttribute('disabled', !this.currentFilePath);
     if (this.openEditorButton) {
-      this.openEditorButton.textContent = 'Open file';
+      this.openEditorButton.textContent = t('file.openFile');
     }
     this.primaryActionButton?.toggleAttribute('disabled', true);
     this.commitButton?.toggleAttribute('disabled', true);
@@ -570,7 +572,7 @@ export class FileHistoryViewController {
     this.page?.classList.remove('hidden');
     if (this.content) {
       this.content.classList.add('diff-content--history');
-      this.content.innerHTML = '<div class="git-panel-empty" role="status" aria-live="polite">Loading file history…</div>';
+      this.content.innerHTML = '<div class="git-panel-empty" role="status" aria-live="polite">' + t('file.loadingFileHistory') + '</div>';
     }
     this.historyListElement = null;
     this.syncToolbar();
@@ -617,27 +619,27 @@ export class FileHistoryViewController {
   renderScopeLabels(entry = {}) {
     const labels = [];
     if (entry.hasStagedChanges) {
-      labels.push('staged');
+      labels.push(t('file.staged'));
     }
     if (entry.hasWorkingTreeChanges) {
-      labels.push('working tree');
+      labels.push(t('file.workingTree'));
     }
     if (entry.hasUntrackedChanges) {
-      labels.push('untracked');
+      labels.push(t('file.untracked'));
     }
-    return labels.length > 0 ? labels.join(' · ') : 'working tree';
+    return labels.length > 0 ? labels.join(' · ') : t('file.workingTree');
   }
 
   renderHistoryItem(entry = {}) {
     const isActive = entry.key === this.selectedEntryKey;
     const additions = Number(entry.additions ?? entry.summary?.additions ?? 0);
     const deletions = Number(entry.deletions ?? entry.summary?.deletions ?? 0);
-    const kicker = entry.type === 'local' ? 'Live workspace' : renderCommitSubtitle(entry);
+    const kicker = entry.type === 'local' ? t('file.liveWorkspace') : renderCommitSubtitle(entry);
     const title = entry.type === 'local'
-      ? 'Local changes'
-      : (entry.subject || entry.shortHash || 'Commit');
+      ? t('file.localChanges')
+      : (entry.subject || entry.shortHash || t('file.commit'));
     const badge = entry.type === 'local'
-      ? '<span class="ui-pill-badge ui-pill-badge--accent file-history-item-badge">Live</span>'
+      ? `<span class="ui-pill-badge ui-pill-badge--accent file-history-item-badge">${t('file.live')}</span>`
       : `<span class="ui-pill-badge ui-pill-badge--code file-history-item-badge">${escapeHtml(entry.shortHash || '')}</span>`;
 
     return `
@@ -668,20 +670,20 @@ export class FileHistoryViewController {
       return `
         <div class="file-history-detail-header">
           <div class="file-history-detail-copy">
-            <span class="file-history-detail-kicker">History</span>
-            <h2 class="file-history-detail-title">No selection</h2>
-            <p class="file-history-detail-meta">Choose a history item to inspect the file diff.</p>
+            <span class="file-history-detail-kicker">${t('common.history')}</span>
+            <h2 class="file-history-detail-title">${t('file.noSelection')}</h2>
+            <p class="file-history-detail-meta">${t('file.chooseAHistoryItemToInspectTheFileDiff')}</p>
           </div>
         </div>
       `;
     }
 
     const kicker = entry.type === 'local'
-      ? 'Live workspace'
-      : `Commit ${escapeHtml(entry.shortHash || '')}`;
+      ? t('file.liveWorkspace')
+      : t('file.commitHash', { hash: escapeHtml(entry.shortHash || '') });
     const title = entry.type === 'local'
-      ? 'Local changes'
-      : escapeHtml(entry.subject || entry.shortHash || 'Commit');
+      ? t('file.localChanges')
+      : escapeHtml(entry.subject || entry.shortHash || t('file.commit'));
     const meta = entry.type === 'local'
       ? escapeHtml(this.renderScopeLabels(entry))
       : renderCommitSubtitle(entry);
@@ -699,7 +701,7 @@ export class FileHistoryViewController {
             type="button"
             data-file-history-open-selected-diff
           >
-            Open standalone diff
+            ${t('file.openStandaloneDiff')}
           </button>
           ${entry.type === 'commit' ? `
             <button
@@ -707,7 +709,7 @@ export class FileHistoryViewController {
               type="button"
               data-file-history-open-selected-preview
             >
-              Preview file
+              ${t('file.previewFile')}
             </button>
           ` : ''}
         </div>
@@ -718,7 +720,7 @@ export class FileHistoryViewController {
   renderSelectedBody(selection) {
     const entry = selection?.entry;
     if (!entry) {
-      return '<div class="diff-empty-state">Select a history entry to inspect this file.</div>';
+      return `<div class="diff-empty-state">${t('file.selectAHistoryEntryToInspectThisFile')}</div>`;
     }
 
     if (selection.loading) {
@@ -727,7 +729,7 @@ export class FileHistoryViewController {
           <div class="diff-file-header">
             <span class="diff-file-path">${escapeHtml(entry.pathAtCommit || this.currentFilePath || '')}</span>
           </div>
-          <div class="diff-empty-state" role="status" aria-live="polite">Loading diff…</div>
+          <div class="diff-empty-state" role="status" aria-live="polite">${t('file.loadingDiff')}</div>
         </section>
       `;
     }
@@ -742,7 +744,7 @@ export class FileHistoryViewController {
     }
 
     if (!selection.detail?.detail) {
-      return '<div class="diff-empty-state">No diff available for this history item.</div>';
+      return `<div class="diff-empty-state">${t('file.noDiffAvailableForThisHistoryItem')}</div>`;
     }
 
     return `
@@ -761,7 +763,7 @@ export class FileHistoryViewController {
     this.syncToolbar();
 
     if (!this.currentFilePath) {
-      this.renderEmpty('No file selected.');
+      this.renderEmpty(t('file.noFileSelected'));
       return;
     }
 
@@ -772,7 +774,7 @@ export class FileHistoryViewController {
 
     const hasRows = Boolean(this.localChanges) || (this.history.commits?.length ?? 0) > 0;
     if (!hasRows) {
-      this.renderEmpty(this.history.error || 'No history found for this file.', { alert: Boolean(this.history.error) });
+      this.renderEmpty(this.history.error || t('file.noHistoryFoundForThisFile'), { alert: Boolean(this.history.error) });
       return;
     }
 
@@ -785,11 +787,11 @@ export class FileHistoryViewController {
     // pi-lens-ignore: no-inner-html-js
     this.content.innerHTML = `
       <section class="file-history-shell">
-        <aside class="file-history-sidebar" aria-label="File history entries">
+        <aside class="file-history-sidebar" aria-label="${t('file.fileHistoryEntries')}">
           <header class="file-history-sidebar-header">
-            <span class="file-history-kicker">File history</span>
+            <span class="file-history-kicker">${t('file.fileHistory')}</span>
             <div class="file-history-title">${renderHistoryTitle(this.currentFilePath)}</div>
-            <p class="file-history-sidebar-copy">Select an entry to inspect the exact changes for this file.</p>
+            <p class="file-history-sidebar-copy">${t('file.selectAnEntryToInspectTheExactChangesForThisFile')}</p>
           </header>
           <div class="file-history-list" data-file-history-list>
             ${this.getEntries().map((entry) => this.renderHistoryItem(entry)).join('')}
@@ -802,7 +804,7 @@ export class FileHistoryViewController {
                 data-file-history-load-more
                 ${this.history.loadingMore ? 'disabled' : ''}
               >
-                ${this.history.loadingMore ? 'Loading…' : 'Load more'}
+                ${this.history.loadingMore ? t('file.loading') : t('file.loadMore')}
               </button>
             </div>
           ` : ''}

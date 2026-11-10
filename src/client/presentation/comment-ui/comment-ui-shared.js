@@ -4,6 +4,7 @@ import {
   normalizeCommentQuoteForComparison,
 } from '../../../domain/comment-threads.js';
 import { clamp } from '../../domain/vault-utils.js';
+import { t } from '../../i18n/index.js';
 
 export { COMMENT_BODY_MAX_LENGTH, clamp };
 
@@ -51,18 +52,18 @@ export function areAnchorsEqual(left, right) {
 
 export function formatAnchorLabel(anchor) {
   if (getAnchorKind(anchor) === 'diagram-element') {
-    return 'Diagram element';
+    return t('comment.diagramElement');
   }
 
   const startLine = Number(anchor?.startLine || 0);
   const endLine = Number(anchor?.endLine || startLine);
   if (!Number.isFinite(startLine) || startLine <= 0) {
-    return 'No source anchor';
+    return t('comment.noSourceAnchor');
   }
 
   return startLine === endLine
-    ? `Line ${startLine}`
-    : `Lines ${startLine}-${endLine}`;
+    ? t('comment.lineLine', { line: startLine })
+    : t('comment.linesStartEnd', { start: startLine, end: endLine });
 }
 
 export function getAnchorGroupKey(anchor = {}) {
@@ -120,7 +121,7 @@ export function createRenderedCommentBody(body, className = 'comment-markdown') 
 }
 
 export function createCommentOverviewThread({
-  authorName = 'Anonymous',
+  authorName = t('comment.anonymous'),
   buttonClassName = 'comment-overview-thread',
   footerClassName = 'comment-overview-thread-footer',
   headerClassName = 'comment-overview-thread-header',
@@ -129,7 +130,7 @@ export function createCommentOverviewThread({
   messageCount = 0,
   previewBody = '',
   previewClassName = 'comment-markdown comment-overview-thread-preview',
-  quote = 'Source anchored comment',
+  quote = t('comment.sourceAnchoredComment'),
   quoteClassName = 'comment-overview-thread-quote',
   timestamp = '',
 } = {}) {
@@ -157,7 +158,7 @@ export function createCommentOverviewThread({
   quoteSection.className = 'comment-overview-thread-section comment-overview-thread-reference';
   const quoteLabel = document.createElement('span');
   quoteLabel.className = 'comment-overview-thread-section-label';
-  quoteLabel.textContent = 'Reference';
+  quoteLabel.textContent = t('comment.reference');
   const quoteNode = document.createElement('span');
   quoteNode.className = quoteClassName;
   quoteNode.textContent = quote;
@@ -171,7 +172,7 @@ export function createCommentOverviewThread({
   author.textContent = authorName;
   const messages = document.createElement('span');
   messages.className = 'comment-overview-thread-message-count';
-  messages.textContent = `${messageCount} message${messageCount === 1 ? '' : 's'}`;
+  messages.textContent = t('comment.message', { count: messageCount });
   footer.append(author, messages);
 
   button.append(header, body, footer);

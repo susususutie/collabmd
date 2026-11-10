@@ -1,4 +1,5 @@
 import { createFragment, escapeHtml } from '../domain/vault-utils.js';
+import { t } from '../i18n/index.js';
 
 export class HostedWorkspaceGateController {
   constructor({ apiClient, appRoot = null, gate, runtimeConfig, teamSettingsController }) {
@@ -25,15 +26,15 @@ export class HostedWorkspaceGateController {
   }
 
   async refresh() {
-    this.show('Loading workspace…');
+    this.show(t('hosted.loadingWorkspace'));
     let status;
     try {
       status = await this.apiClient.getStatus();
     } catch (error) {
       if (error.status === 401 || error.code === 'HOSTED_AUTH_REQUIRED') {
-        this.show('Sign in to access this workspace.', { title: 'Sign-in required' });
+        this.show(t('hosted.signInToAccessThisWorkspace'), { title: t('hosted.signInRequired') });
       } else {
-        this.show(error.message || 'Failed to load workspace status.', { error: true, title: 'Workspace unavailable' });
+        this.show(error.message || t('hosted.failedToLoadWorkspaceStatus2'), { error: true, title: t('hosted.workspaceUnavailable') });
       }
       this.teamSettingsController?.setTriggerVisible(false);
       return;
@@ -53,7 +54,7 @@ export class HostedWorkspaceGateController {
       if (isAdmin) {
         this.renderSetup(status);
       } else {
-        this.show('Workspace setup is incomplete. Ask a Team Admin to finish setup.', { title: status.team?.name || 'Workspace setup' });
+        this.show(t('hosted.workspaceSetupIsIncompleteAskATeamAdminToFinish'), { title: status.team?.name || t('hosted.workspaceSetup') });
       }
       return;
     }
@@ -84,7 +85,7 @@ export class HostedWorkspaceGateController {
     this.reveal();
   }
 
-  show(message, { error = false, title = 'Workspace' } = {}) {
+  show(message, { error = false, title = t('hosted.workspace') } = {}) {
     this.render(`
       <h2 class="hosted-gate-title" id="hostedGateTitle">${escapeHtml(title)}</h2>
       <p class="hosted-gate-status${error ? ' is-error' : ''}" role="status">${escapeHtml(message)}</p>
@@ -93,18 +94,18 @@ export class HostedWorkspaceGateController {
 
   renderClaim() {
     this.render(`
-      <h2 class="hosted-gate-title" id="hostedGateTitle">Claim this workspace</h2>
-      <p class="hosted-gate-copy">Enter the team name and the one-time claim token from provisioning to become the first Team Admin.</p>
+      <h2 class="hosted-gate-title" id="hostedGateTitle">${t('hosted.claimThisWorkspace')}</h2>
+      <p class="hosted-gate-copy">${t('hosted.enterTheTeamNameAndTheOneTimeClaimTokenFrom')}</p>
       <form class="hosted-gate-form" data-claim-form>
         <label class="app-dialog-field">
-          <span class="app-dialog-label">Team name</span>
+          <span class="app-dialog-label">${t('hosted.teamName')}</span>
           <input class="ui-input" name="teamName" maxlength="80" autocomplete="off" spellcheck="false" required>
         </label>
         <label class="app-dialog-field">
-          <span class="app-dialog-label">Claim token</span>
+          <span class="app-dialog-label">${t('hosted.claimToken')}</span>
           <input class="ui-input" name="token" type="password" autocomplete="off" spellcheck="false" required>
         </label>
-        <button class="ui-button ui-button--primary" type="submit">Claim workspace</button>
+        <button class="ui-button ui-button--primary" type="submit">${t('hosted.claimWorkspace')}</button>
       </form>
       <p class="hosted-gate-live" role="status" aria-live="polite"></p>
     `);
@@ -112,18 +113,18 @@ export class HostedWorkspaceGateController {
 
   renderSetup(status) {
     this.render(`
-      <h2 class="hosted-gate-title" id="hostedGateTitle">${escapeHtml(status.team?.name || 'Workspace setup')}</h2>
-      <p class="hosted-gate-copy">Workspace setup is not complete. The editor and invitations stay unavailable until setup is done. Connecting a GitHub vault source comes later; for now, completing setup unlocks team management.</p>
-      <button class="ui-button ui-button--primary" type="button" data-complete-setup>Complete setup</button>
+      <h2 class="hosted-gate-title" id="hostedGateTitle">${escapeHtml(status.team?.name || t('hosted.workspaceSetup'))}</h2>
+      <p class="hosted-gate-copy">${t('hosted.workspaceSetupIsNotCompleteTheEditorAnd')}</p>
+      <button class="ui-button ui-button--primary" type="button" data-complete-setup>${t('hosted.completeSetup')}</button>
       <p class="hosted-gate-live" role="status" aria-live="polite"></p>
     `);
   }
 
   renderAccept(status) {
     this.render(`
-      <h2 class="hosted-gate-title" id="hostedGateTitle">${escapeHtml(status.team?.name || 'Workspace')}</h2>
-      <p class="hosted-gate-copy">You are signed in but not a team member yet. If a Team Admin invited your Google email, accept below to join.</p>
-      <button class="ui-button ui-button--primary" type="button" data-accept-invitation>Accept invitation</button>
+      <h2 class="hosted-gate-title" id="hostedGateTitle">${escapeHtml(status.team?.name || t('hosted.workspace'))}</h2>
+      <p class="hosted-gate-copy">${t('hosted.youAreSignedInButNotATeamMemberYetIfATeamAdmin')}</p>
+      <button class="ui-button ui-button--primary" type="button" data-accept-invitation>${t('hosted.acceptInvitation')}</button>
       <p class="hosted-gate-live" role="status" aria-live="polite"></p>
     `);
   }

@@ -1,3 +1,4 @@
+import { t } from '../i18n/index.js';
 import {
   getActiveVaultId,
   resolveAppUrl,
@@ -41,7 +42,7 @@ export class CanvasEmbedController {
 
     const iframe = document.createElement('iframe');
     iframe.className = 'canvas-file-preview-frame';
-    iframe.title = `Canvas: ${filePath}`;
+    iframe.title = t('canvas.canvasPath', { path: filePath });
     iframe.src = url.toString();
     this.filePath = filePath;
     this.iframe = iframe;
@@ -79,7 +80,7 @@ export class CanvasEmbedController {
       const finish = (canLeave) => {
         clearTimeout(timeout);
         this.pendingDisconnects.delete(requestId);
-        if (!canLeave) this.toastController?.show('Waiting for the canvas to reconnect before leaving');
+        if (!canLeave) this.toastController?.show(t('canvas.waitingForTheCanvasToReconnectBeforeLeaving'));
         resolve(canLeave);
       };
       this.pendingDisconnects.set(requestId, finish);

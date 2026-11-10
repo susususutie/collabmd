@@ -15,6 +15,7 @@ import {
 } from './comment-ui-shared.js';
 import { buttonClassNames } from '../components/ui/button.js';
 import { inputClassNames } from '../components/ui/class-names.js';
+import { t } from '../../i18n/index.js';
 
 /** @this {any} */
 function ensureCardRoot() {
@@ -199,7 +200,7 @@ function renderCard() {
 
   const title = document.createElement('h3');
   title.className = 'comment-card-title';
-  title.textContent = this.activeCard.mode === 'create' ? 'New comment' : 'Comment threads';
+  title.textContent = this.activeCard.mode === 'create' ? t('comment.newComment') : t('comment.commentThreads');
 
   const meta = document.createElement('p');
   meta.className = 'comment-card-meta';
@@ -215,8 +216,8 @@ function renderCard() {
     pill: true,
     extra: ['ui-action-pill', 'comment-card-close'],
   });
-  closeButton.setAttribute('aria-label', 'Close comments');
-  closeButton.textContent = 'Close';
+  closeButton.setAttribute('aria-label', t('comment.closeComments'));
+  closeButton.textContent = t('common.close');
   closeButton.addEventListener('click', () => this.closeCard());
 
   header.append(titleWrap, closeButton);
@@ -228,7 +229,9 @@ function renderCard() {
   if (this.activeCard.mode === 'create' && this.activeCard.anchor?.fallbackToLines) {
     const anchorNote = document.createElement('p');
     anchorNote.className = 'comment-card-anchor-note';
-    anchorNote.textContent = `Exact preview mapping was unavailable. This comment will be anchored to ${formatAnchorLabel(this.activeCard.anchor).toLowerCase()}.`;
+    anchorNote.textContent = t('comment.exactPreviewMappingWasUnavailableThisCommentWill', {
+      anchor: formatAnchorLabel(this.activeCard.anchor).toLowerCase(),
+    });
     content.appendChild(anchorNote);
   }
 
@@ -314,8 +317,8 @@ function createComposer() {
   textarea.className = inputClassNames({ extra: 'comment-card-input' });
   textarea.rows = 4;
   textarea.maxLength = COMMENT_BODY_MAX_LENGTH;
-  textarea.setAttribute('aria-label', 'Add comment');
-  textarea.placeholder = 'Add context, feedback, or a question…';
+  textarea.setAttribute('aria-label', t('comment.addComment'));
+  textarea.placeholder = t('comment.addContextFeedbackOrAQuestion');
   textarea.value = this.activeCard?.composerDraft?.value ?? '';
 
   const actions = document.createElement('div');
@@ -324,13 +327,13 @@ function createComposer() {
   const cancel = document.createElement('button');
   cancel.type = 'button';
   cancel.className = buttonClassNames({ variant: 'secondary' });
-  cancel.textContent = 'Cancel';
+  cancel.textContent = t('common.cancel');
   cancel.addEventListener('click', () => this.closeCard());
 
   const submit = document.createElement('button');
   submit.type = 'submit';
   submit.className = buttonClassNames({ variant: 'primary' });
-  submit.textContent = 'Post comment';
+  submit.textContent = t('comment.postComment');
 
   actions.append(cancel, submit);
   form.append(textarea, actions);
@@ -371,10 +374,10 @@ function createThreadElement(thread) {
   });
   const isReplying = this.activeCard?.replyThreadId === thread.id;
   reply.classList.toggle('is-active', isReplying);
-  reply.textContent = 'Reply';
+  reply.textContent = t('comment.reply');
   reply.setAttribute('aria-pressed', String(isReplying));
-  reply.setAttribute('aria-label', isReplying ? 'Cancel reply' : 'Reply to thread');
-  reply.title = isReplying ? 'Cancel reply' : 'Reply to thread';
+  reply.setAttribute('aria-label', isReplying ? t('comment.cancelReply') : t('comment.replyToThread'));
+  reply.title = isReplying ? t('comment.cancelReply') : t('comment.replyToThread');
   reply.addEventListener('click', () => {
     if (isReplying && this.activeCard?.replyDrafts?.[thread.id]) {
       delete this.activeCard.replyDrafts[thread.id];
@@ -394,7 +397,7 @@ function createThreadElement(thread) {
     pill: true,
     extra: ['ui-action-pill', 'comment-thread-card-action', 'is-danger'],
   });
-  resolve.textContent = 'Resolve';
+  resolve.textContent = t('comment.resolve');
   resolve.addEventListener('click', async () => {
     await this.onResolveThread?.(thread.id);
   });
@@ -499,7 +502,7 @@ function createReactionBar(thread, message) {
   moreButton.setAttribute('aria-expanded', String(
     isReactionPickerOpen(this.reactionPicker, thread.id, message.id),
   ));
-  moreButton.textContent = 'More';
+  moreButton.textContent = t('common.more');
   moreButton.addEventListener('click', () => {
     const isOpen = isReactionPickerOpen(this.reactionPicker, thread.id, message.id);
     this.reactionPicker = isOpen
@@ -528,7 +531,7 @@ function createQuickReactionButton(thread, message, emoji) {
   button.type = 'button';
   button.className = 'ui-icon-chip ui-icon-chip--comment comment-reaction-quick-add';
   button.textContent = emoji;
-  button.title = `React with ${emoji}`;
+  button.title = t('comment.reactWithEmoji', { emoji });
   button.addEventListener('click', async () => {
     await this.onToggleReaction?.(thread.id, message.id, emoji);
   });
@@ -555,7 +558,7 @@ function createReactionPickerButton(thread, message, emoji) {
   button.type = 'button';
   button.className = 'ui-icon-chip ui-icon-chip--comment comment-reaction-picker-btn';
   button.textContent = emoji;
-  button.title = `React with ${emoji}`;
+  button.title = t('comment.reactWithEmoji', { emoji });
   button.addEventListener('click', async () => {
     const didToggle = await this.onToggleReaction?.(thread.id, message.id, emoji);
     if (didToggle) {
@@ -576,8 +579,8 @@ function createReplyComposer(thread) {
   textarea.className = inputClassNames({ extra: 'comment-card-input' });
   textarea.rows = 3;
   textarea.maxLength = COMMENT_BODY_MAX_LENGTH;
-  textarea.setAttribute('aria-label', 'Reply to thread');
-  textarea.placeholder = 'Reply to thread…';
+  textarea.setAttribute('aria-label', t('comment.replyToThread'));
+  textarea.placeholder = t('comment.replyToThread2');
   textarea.value = draft?.value ?? '';
 
   const actions = document.createElement('div');
@@ -586,7 +589,7 @@ function createReplyComposer(thread) {
   const cancel = document.createElement('button');
   cancel.type = 'button';
   cancel.className = buttonClassNames({ variant: 'secondary' });
-  cancel.textContent = 'Cancel';
+  cancel.textContent = t('common.cancel');
   cancel.addEventListener('click', () => {
     if (this.activeCard?.replyDrafts?.[thread.id]) {
       delete this.activeCard.replyDrafts[thread.id];
@@ -601,7 +604,7 @@ function createReplyComposer(thread) {
   const submit = document.createElement('button');
   submit.type = 'submit';
   submit.className = buttonClassNames({ variant: 'primary' });
-  submit.textContent = 'Reply';
+  submit.textContent = t('comment.reply');
 
   actions.append(cancel, submit);
   form.append(textarea, actions);

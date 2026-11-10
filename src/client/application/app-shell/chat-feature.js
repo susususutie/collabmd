@@ -1,3 +1,4 @@
+import { t } from '../../i18n/index.js';
 import { getUserAvatarTextColor } from '../../domain/room.js';
 
 const CHAT_ALERT_MUTE_STORAGE_KEY = 'collabmd-chat-alerts-muted-until';
@@ -129,16 +130,16 @@ export const chatFeature = {
 
     if (this.elements.chatStatus) {
       this.elements.chatStatus.textContent = !this.chatInitialSyncComplete
-        ? 'Syncing...'
+        ? t('collab.syncing')
         : !isConnected
-          ? connectionState.unreachable ? 'Server unreachable' : 'Reconnecting...'
-          : `${this.globalUsers.length} online`;
+          ? connectionState.unreachable ? t('collab.serverUnreachable') : t('collab.reconnecting')
+          : t('collab.countOnline', { count: this.globalUsers.length });
     }
 
     const sendButton = this.elements.chatForm?.querySelector?.('button[type="submit"]');
     if (sendButton) {
       sendButton.disabled = !canSend;
-      sendButton.title = canSend ? 'Send message' : 'Chat is unavailable while disconnected';
+      sendButton.title = canSend ? t('collab.sendMessage') : t('collab.chatIsUnavailableWhileDisconnected');
     }
 
     if (!list || !this.chatIsOpen || !messagesChanged) {
@@ -189,7 +190,7 @@ export const chatFeature = {
 
     const author = document.createElement('span');
     author.className = 'chat-message-author';
-    author.textContent = isLocal ? `${message.userName} (you)` : message.userName;
+    author.textContent = isLocal ? t('collab.nameYou', { name: message.userName }) : message.userName;
 
     const time = document.createElement('span');
     time.className = 'chat-message-time';
@@ -246,7 +247,7 @@ export const chatFeature = {
   },
 
   formatChatToastMessage(message) {
-    const sender = message?.userName || 'Someone';
+    const sender = message?.userName || t('collab.someone');
     const text = String(message?.text ?? '').replace(/\s+/g, ' ').trim();
     const compactText = text.length > 88 ? `${text.slice(0, 85).trimEnd()}...` : text;
     return `${sender}: ${compactText}`;
@@ -266,13 +267,13 @@ export const chatFeature = {
     const blocked = permission === 'denied';
     const statusState = enabled
       ? {
-          text: muted ? 'Alerts muted' : 'Alerts on',
-          label: muted ? 'Desktop alerts muted' : 'Desktop alerts enabled',
+          text: muted ? t('collab.alertsMuted') : t('collab.alertsOn'),
+          label: muted ? t('collab.desktopAlertsMuted') : t('collab.desktopAlertsEnabled'),
         }
       : blocked
         ? {
-            text: 'Alerts blocked',
-            label: 'Desktop alerts blocked in browser settings',
+            text: t('collab.alertsBlocked'),
+            label: t('collab.desktopAlertsBlockedInBrowserSettings'),
           }
         : null;
 
@@ -280,15 +281,15 @@ export const chatFeature = {
       button.classList.toggle('hidden', permission !== 'default');
       button.disabled = false;
       button.removeAttribute('aria-pressed');
-      button.textContent = 'Enable desktop alerts';
-      button.title = 'Allow desktop alerts for new chat messages';
+      button.textContent = t('collab.enableDesktopAlerts');
+      button.title = t('collab.allowDesktopAlertsForNewChatMessages');
     }
 
     if (muteButton) {
       muteButton.classList.toggle('hidden', !enabled);
       muteButton.disabled = false;
       muteButton.setAttribute('aria-pressed', String(muted));
-      const muteLabel = muted ? 'Unmute desktop alerts' : 'Mute desktop alerts for one hour';
+      const muteLabel = muted ? t('collab.unmuteDesktopAlerts') : t('collab.muteDesktopAlertsForOneHour');
       muteButton.setAttribute('aria-label', muteLabel);
       muteButton.title = muteLabel;
     }
@@ -318,7 +319,7 @@ export const chatFeature = {
 
     if (permission === 'denied') {
       (this.chatToastController ?? this.toastController)?.show(
-        'Desktop alerts are blocked. Allow them in browser site settings.',
+        t('collab.desktopAlertsAreBlockedAllowThemInBrowserSite'),
         { duration: 5000, tone: 'warning' },
       );
       return;
@@ -326,7 +327,7 @@ export const chatFeature = {
 
     if (permission === 'unsupported') {
       (this.chatToastController ?? this.toastController)?.show(
-        'This browser does not support desktop alerts.',
+        t('collab.thisBrowserDoesNotSupportDesktopAlerts'),
         { duration: 5000, tone: 'warning' },
       );
     }
@@ -352,11 +353,11 @@ export const chatFeature = {
     button.classList.toggle('is-unread', shouldEmphasizeUnread);
     button.setAttribute(
       'aria-label',
-      hasUnread ? `Open team chat, ${this.chatUnreadCount} unread` : 'Open team chat',
+      hasUnread ? t('collab.openTeamChatCountUnread', { count: this.chatUnreadCount }) : t('collab.openTeamChat'),
     );
     button.title = this.chatUnreadCount > 0
-      ? `Team chat (${this.chatUnreadCount} unread)`
-      : 'Team chat';
+      ? t('collab.teamChatCountUnread', { count: this.chatUnreadCount })
+      : t('collab.teamChat');
 
     if (!badge) {
       return;
@@ -391,7 +392,7 @@ export const chatFeature = {
           this.openChatPanel();
         },
         tag: `collabmd-chat-${message?.id ?? 'message'}`,
-        title: `New message from ${message?.userName || 'Someone'}`,
+        title: t('collab.newMessageFromName', { name: message?.userName || t('collab.someone') }),
       });
     }
 

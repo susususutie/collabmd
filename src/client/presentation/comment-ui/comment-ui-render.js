@@ -3,6 +3,7 @@ import {
   formatAnchorLabel,
   getLatestGroupMessage,
 } from './comment-ui-shared.js';
+import { t } from '../../i18n/index.js';
 
 /**
  * @typedef {object} CommentUiRenderContext
@@ -49,7 +50,7 @@ function renderToolbar() {
   if (this.commentsToggleButton) {
     this.commentsToggleButton.classList.toggle('active', this.drawerOpen);
     this.commentsToggleButton.setAttribute('aria-expanded', String(this.drawerOpen));
-    const label = totalCount > 0 ? `Comments ${totalCount}` : 'Comments';
+    const label = totalCount > 0 ? t('comment.commentsCount', { count: totalCount }) : t('comment.comments');
     const labelElement = this.commentsToggleButton.querySelector('.ui-action-label');
     if (labelElement) {
       labelElement.textContent = label;

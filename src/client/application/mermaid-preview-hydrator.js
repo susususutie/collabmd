@@ -1,3 +1,4 @@
+import { t } from '../i18n/index.js';
 import {
   createDiagramExportFileNames,
   renderMermaidExportSvgMarkup,
@@ -267,7 +268,7 @@ export class MermaidPreviewHydrator extends DiagramPreviewHydrator {
         sourceNode?.after(createDiagramErrorPlaceholderCard({
           key,
           kind: 'mermaid',
-          label: shell.dataset.mermaidLabel || 'Mermaid diagram',
+          label: shell.dataset.mermaidLabel || t('preview.mermaidDiagram'),
           message,
         }));
       }

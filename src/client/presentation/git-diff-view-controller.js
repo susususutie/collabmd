@@ -1,11 +1,12 @@
 import { createExcalidrawExportOptions } from '../domain/excalidraw-scene.js';
 import { escapeHtml } from '../domain/vault-utils.js';
-import { commitButtonLabel } from '../domain/git-labels.js';
+import { commitButtonLabel, formatRelativeDateLabel } from '../domain/git-labels.js';
 import { getVaultPathLeaf, getVaultPathParent } from '../domain/vault-paths.js';
 import { resolveApiUrl } from '../domain/runtime-paths.js';
 import { renderDrawioViewer } from './drawio-viewer.js';
 import { buttonClassNames } from './components/ui/button.js';
 import { getVaultFileKind } from '../../domain/file-kind.js';
+import { t } from '../i18n/index.js';
 
 const IMAGE_MIME_LABELS = Object.freeze({
   '.gif': 'GIF',
@@ -24,7 +25,7 @@ function getImageFormat(filePath = '') {
   const normalizedPath = String(filePath ?? '').toLowerCase();
   const dotIndex = normalizedPath.lastIndexOf('.');
   const extension = dotIndex >= 0 ? normalizedPath.slice(dotIndex) : '';
-  return IMAGE_MIME_LABELS[extension] ?? 'Image';
+  return IMAGE_MIME_LABELS[extension] ?? t('common.image');
 }
 
 function parseExcalidrawScene(rawSource = '') {
@@ -645,7 +646,7 @@ export class GitDiffViewController {
     this.excalidrawPreviewPayloads.clear();
     this.drawioPreviewPayloads.clear();
     this.requestScope = scope;
-    this.renderLoading('Loading diff summary…');
+    this.renderLoading(t('git.loadingDiffSummary'));
 
     try {
       const data = await this.gitApiClient.readDiff({
@@ -668,14 +669,14 @@ export class GitDiffViewController {
       return data;
     } catch (error) {
       console.error('[git-diff] Failed to load diff:', error);
-      this.toastController?.show('Failed to load git diff');
+      this.toastController?.show(t('git.failedToLoadGitDiff'));
       this.data = {
         files: [],
         metaOnly: false,
         source: 'workspace',
         summary: { additions: 0, deletions: 0, filesChanged: 0 },
       };
-      this.renderEmpty('Failed to load git diff', { alert: true });
+      this.renderEmpty(t('git.failedToLoadGitDiff'), { alert: true });
       return this.data;
     }
   }
@@ -698,7 +699,7 @@ export class GitDiffViewController {
     this.excalidrawPreviewPayloads.clear();
     this.drawioPreviewPayloads.clear();
     this.requestScope = 'all';
-    this.renderLoading('Loading commit summary…');
+    this.renderLoading(t('git.loadingCommitSummary'));
 
     try {
       const data = await this.gitApiClient.readCommit({
@@ -730,7 +731,7 @@ export class GitDiffViewController {
       return data;
     } catch (error) {
       console.error('[git-diff] Failed to load commit:', error);
-      this.toastController?.show('Failed to load git commit');
+      this.toastController?.show(t('git.failedToLoadGitCommit'));
       this.data = {
         commit: null,
         files: [],
@@ -739,7 +740,7 @@ export class GitDiffViewController {
         summary: { additions: 0, deletions: 0, filesChanged: 0 },
       };
       this.commitMeta = null;
-      this.renderEmpty('Failed to load git commit', { alert: true });
+      this.renderEmpty(t('git.failedToLoadGitCommit'), { alert: true });
       return this.data;
     }
   }
@@ -788,7 +789,7 @@ export class GitDiffViewController {
     void this.loadCurrentFile();
   }
 
-  renderLoading(message = 'Loading git diff…') {
+  renderLoading(message = t('git.loadingGitDiff')) {
     if (!this.isActive) {
       return;
     }
@@ -906,29 +907,29 @@ export class GitDiffViewController {
     const sources = this.getImageDiffSources(file);
     const sizeLabel = formatByteLength(file.byteLength);
     return `
-      <section class="diff-special diff-media-diff" aria-label="Image diff">
+      <section class="diff-special diff-media-diff" aria-label="${t('git.imageDiff')}">
         <div class="diff-special-header">
           <div>
-            <span class="diff-special-eyebrow">Binary preview</span>
-            <h2 class="diff-special-title">Image comparison</h2>
+            <span class="diff-special-eyebrow">${t('git.binaryPreview')}</span>
+            <h2 class="diff-special-title">${t('git.imageComparison')}</h2>
           </div>
           <span class="diff-special-note">${escapeHtml(getImageFormat(file.path))}${sizeLabel ? ` · ${escapeHtml(sizeLabel)}` : ''}</span>
         </div>
         <div class="diff-media-grid">
           ${this.renderImagePane({
-            emptyLabel: 'No previous image',
+            emptyLabel: t('git.noPreviousImage'),
             file,
-            label: 'Before',
+            label: t('git.before'),
             source: sources.before,
           })}
           ${this.renderImagePane({
-            emptyLabel: 'No image in this revision',
+            emptyLabel: t('git.noImageInThisRevision'),
             file,
-            label: 'After',
+            label: t('git.after'),
             source: sources.after,
           })}
         </div>
-        <p class="diff-special-footnote">Image bytes are shown as a visual comparison instead of a text patch.</p>
+        <p class="diff-special-footnote">${t('git.imageBytesAreShownAsAVisualComparisonInsteadOfA')}</p>
       </section>
     `;
   }
@@ -949,14 +950,14 @@ export class GitDiffViewController {
     const previewMarkup = scene
       ? `
         <div class="diff-excalidraw-preview" data-diff-excalidraw-preview="${escapeHtml(previewId)}">
-          <span class="diff-excalidraw-preview-loading">Rendering diagram…</span>
+          <span class="diff-excalidraw-preview-loading">${t('git.renderingDiagram')}</span>
         </div>
       `
       : `<div class="diff-excalidraw-preview diff-excalidraw-preview--empty"><span>${escapeHtml(emptyLabel)}</span></div>`;
     const sourceMarkup = source
       ? `
         <details class="diff-excalidraw-source">
-          <summary>Structured scene</summary>
+          <summary>${t('git.structuredScene')}</summary>
           <pre>${escapeHtml(source)}</pre>
         </details>
       `
@@ -966,7 +967,7 @@ export class GitDiffViewController {
       <div class="diff-excalidraw-pane">
         <div class="diff-excalidraw-pane-header">
           <span class="diff-media-pane-label">${escapeHtml(label)}</span>
-          <span class="diff-media-pane-meta">${scene ? `${getVisibleSceneElements(scene).length} elements` : '—'}</span>
+          <span class="diff-media-pane-meta">${scene ? t('git.countElements', { count: getVisibleSceneElements(scene).length }) : '—'}</span>
         </div>
         ${previewMarkup}
         ${sourceMarkup}
@@ -986,39 +987,39 @@ export class GitDiffViewController {
     };
     const hasSceneData = Boolean(scenes.before || scenes.after);
     const loadButton = file.tooLarge && file.canLoadFullPatch
-      ? `<button class="${buttonClassNames({ variant: 'secondary', extra: 'diff-load-full-btn' })}" type="button" data-load-full-diff data-diff-file-path="${escapeHtml(file.path)}">Load full diff</button>`
+      ? `<button class="${buttonClassNames({ variant: 'secondary', extra: 'diff-load-full-btn' })}" type="button" data-load-full-diff data-diff-file-path="${escapeHtml(file.path)}">${t('git.loadFullDiff')}</button>`
       : '';
 
     return `
-      <section class="diff-special diff-excalidraw-diff" aria-label="Excalidraw diff">
+      <section class="diff-special diff-excalidraw-diff" aria-label="${t('git.excalidrawDiff')}">
         <div class="diff-special-header">
           <div>
-            <span class="diff-special-eyebrow">Diagram-aware preview</span>
-            <h2 class="diff-special-title">Excalidraw scene changes</h2>
+            <span class="diff-special-eyebrow">${t('git.diagramAwarePreview')}</span>
+            <h2 class="diff-special-title">${t('git.excalidrawSceneChanges')}</h2>
           </div>
-          <span class="diff-special-note">${hasSceneData ? `${stats.afterCount} visible elements` : 'Scene preview unavailable'}</span>
+          <span class="diff-special-note">${hasSceneData ? t('git.countVisibleElements', { count: stats.afterCount }) : t('git.scenePreviewUnavailable')}</span>
         </div>
-        <div class="diff-scene-summary" aria-label="Scene change summary">
-          <span class="diff-scene-stat diff-scene-stat--add"><strong>+${stats.added}</strong><span>added</span></span>
-          <span class="diff-scene-stat diff-scene-stat--update"><strong>~${stats.updated}</strong><span>updated</span></span>
-          <span class="diff-scene-stat diff-scene-stat--remove"><strong>-${stats.removed}</strong><span>removed</span></span>
+        <div class="diff-scene-summary" aria-label="${t('git.sceneChangeSummary')}">
+          <span class="diff-scene-stat diff-scene-stat--add"><strong>+${stats.added}</strong><span>${t('git.added')}</span></span>
+          <span class="diff-scene-stat diff-scene-stat--update"><strong>~${stats.updated}</strong><span>${t('git.updated')}</span></span>
+          <span class="diff-scene-stat diff-scene-stat--remove"><strong>-${stats.removed}</strong><span>${t('git.removed')}</span></span>
         </div>
         <div class="diff-excalidraw-grid">
           ${this.renderExcalidrawPane({
-            emptyLabel: 'No previous scene',
-            label: 'Before',
+            emptyLabel: t('git.noPreviousScene'),
+            label: t('git.before'),
             scene: scenes.before,
             source: scenes.beforeSource ? JSON.stringify(scenes.before || parseExcalidrawScene(scenes.beforeSource), null, 2) : '',
           })}
           ${this.renderExcalidrawPane({
-            emptyLabel: file.tooLarge ? 'Load the full diff to preview this scene' : 'No scene in this revision',
-            label: 'After',
+            emptyLabel: file.tooLarge ? t('git.loadTheFullDiffToPreviewThisScene') : t('git.noSceneInThisRevision'),
+            label: t('git.after'),
             scene: scenes.after,
             source: scenes.afterSource ? JSON.stringify(scenes.after || parseExcalidrawScene(scenes.afterSource), null, 2) : '',
           })}
         </div>
         ${loadButton}
-        <p class="diff-special-footnote">The preview compares drawable elements by id; expand “Structured scene” when you need the underlying JSON.</p>
+        <p class="diff-special-footnote">${t('git.thePreviewComparesDrawableElementsByIdExpand')}</p>
       </section>
     `;
   }
@@ -1094,14 +1095,14 @@ export class GitDiffViewController {
     const previewMarkup = source && !isEmptyModel
       ? `
         <div class="diff-drawio-preview" data-diff-drawio-preview="${escapeHtml(previewId)}">
-          <span class="diff-drawio-preview-loading">Rendering draw.io preview…</span>
+          <span class="diff-drawio-preview-loading">${t('git.renderingDrawIoPreview')}</span>
         </div>
       `
-      : `<div class="diff-drawio-preview diff-drawio-preview--empty"><span>${escapeHtml(isEmptyModel ? 'No drawable cells' : emptyLabel)}</span></div>`;
+      : `<div class="diff-drawio-preview diff-drawio-preview--empty"><span>${escapeHtml(isEmptyModel ? t('git.noDrawableCells') : emptyLabel)}</span></div>`;
     const sourceMarkup = source
       ? `
         <details class="diff-drawio-source">
-          <summary>XML source</summary>
+          <summary>${t('git.xmlSource')}</summary>
           <pre>${escapeHtml(formatDrawioSource(source))}</pre>
         </details>
       `
@@ -1132,42 +1133,42 @@ export class GitDiffViewController {
     };
     const hasSource = Boolean(sources.before || sources.after);
     const countLabel = !hasSource
-      ? 'Preview unavailable'
+      ? t('git.previewUnavailable')
       : stats.cellBased
-        ? `${stats.afterCount} drawable cells`
-        : 'Source-level comparison';
+        ? t('git.countDrawableCells', { count: stats.afterCount })
+        : t('git.sourceLevelComparison');
     const loadButton = file.tooLarge && file.canLoadFullPatch
-      ? `<button class="${buttonClassNames({ variant: 'secondary', extra: 'diff-load-full-btn' })}" type="button" data-load-full-diff data-diff-file-path="${escapeHtml(file.path)}">Load full diff</button>`
+      ? `<button class="${buttonClassNames({ variant: 'secondary', extra: 'diff-load-full-btn' })}" type="button" data-load-full-diff data-diff-file-path="${escapeHtml(file.path)}">${t('git.loadFullDiff')}</button>`
       : '';
 
     return `
-      <section class="diff-special diff-drawio-diff" aria-label="draw.io diff">
+      <section class="diff-special diff-drawio-diff" aria-label="${t('git.drawIoDiff')}">
         <div class="diff-special-header">
           <div>
-            <span class="diff-special-eyebrow">Diagram-aware preview</span>
-            <h2 class="diff-special-title">draw.io diagram changes</h2>
+            <span class="diff-special-eyebrow">${t('git.diagramAwarePreview')}</span>
+            <h2 class="diff-special-title">${t('git.drawIoDiagramChanges')}</h2>
           </div>
           <span class="diff-special-note">${escapeHtml(countLabel)}</span>
         </div>
-        <div class="diff-scene-summary" aria-label="draw.io change summary">
-          <span class="diff-scene-stat diff-scene-stat--add"><strong>+${stats.added}</strong><span>added</span></span>
-          <span class="diff-scene-stat diff-scene-stat--update"><strong>~${stats.updated}</strong><span>updated</span></span>
-          <span class="diff-scene-stat diff-scene-stat--remove"><strong>-${stats.removed}</strong><span>removed</span></span>
+        <div class="diff-scene-summary" aria-label="${t('git.drawIoChangeSummary')}">
+          <span class="diff-scene-stat diff-scene-stat--add"><strong>+${stats.added}</strong><span>${t('git.added')}</span></span>
+          <span class="diff-scene-stat diff-scene-stat--update"><strong>~${stats.updated}</strong><span>${t('git.updated')}</span></span>
+          <span class="diff-scene-stat diff-scene-stat--remove"><strong>-${stats.removed}</strong><span>${t('git.removed')}</span></span>
         </div>
         <div class="diff-drawio-grid">
           ${this.renderDrawioPane({
-            emptyLabel: 'No previous diagram',
-            label: 'Before',
+            emptyLabel: t('git.noPreviousDiagram'),
+            label: t('git.before'),
             source: sources.before,
           })}
           ${this.renderDrawioPane({
-            emptyLabel: file.tooLarge ? 'Load the full diff to preview this diagram' : 'No diagram in this revision',
-            label: 'After',
+            emptyLabel: file.tooLarge ? t('git.loadTheFullDiffToPreviewThisDiagram') : t('git.noDiagramInThisRevision'),
+            label: t('git.after'),
             source: sources.after,
           })}
         </div>
         ${loadButton}
-        <p class="diff-special-footnote">Both revisions use the draw.io viewer; expand “XML source” when you need the underlying document.</p>
+        <p class="diff-special-footnote">${t('git.bothRevisionsUseTheDrawIoViewerExpandXmlSource')}</p>
       </section>
     `;
   }
@@ -1197,7 +1198,7 @@ export class GitDiffViewController {
         preview.classList.add('is-ready');
       } catch (error) {
         console.warn('[git-diff] Failed to render Excalidraw scene preview:', error);
-        preview.textContent = 'Visual preview unavailable';
+        preview.textContent = t('git.visualPreviewUnavailable');
         preview.classList.add('is-error');
       }
     }
@@ -1224,7 +1225,7 @@ export class GitDiffViewController {
         preview.classList.add('is-ready');
       } catch (error) {
         console.warn('[git-diff] Failed to render draw.io diagram preview:', error);
-        preview.textContent = 'Visual preview unavailable';
+        preview.textContent = t('git.visualPreviewUnavailable');
         preview.classList.add('is-error');
       }
     }
@@ -1236,7 +1237,7 @@ export class GitDiffViewController {
       ? `<span class="diff-file-header-kind">${escapeHtml(getImageFormat(file.path))} image</span>`
       : `<span class="diff-file-header-stats"><span class="ui-stat-token ui-stat-token--add diff-stats-add">+${file.stats?.additions ?? 0}</span><span class="ui-stat-token ui-stat-token--del diff-stats-del">-${file.stats?.deletions ?? 0}</span></span>`;
     const inclusionStatus = file.hasStagedChanges
-      ? '<span class="ui-pill-badge ui-pill-badge--muted" aria-label="Included in next commit">✓ Included</span>'
+      ? `<span class="ui-pill-badge ui-pill-badge--muted" aria-label="${t('git.includedInNextCommit')}">✓ ${t('git.included')}</span>`
       : '';
     return `
       <div class="diff-file-header">
@@ -1281,7 +1282,7 @@ export class GitDiffViewController {
     return `
       <div class="diff-split">
         <div class="diff-split-pane">
-          <div class="diff-split-pane-header">Before</div>
+          <div class="diff-split-pane-header">${t('git.before')}</div>
           ${hunks}
         </div>
       </div>
@@ -1290,7 +1291,7 @@ export class GitDiffViewController {
 
   renderDiffDetail(detail, index, { includeHeader = true } = {}) {
     if (!detail) {
-      return '<div class="diff-empty-state">Select a file to load its diff.</div>';
+      return `<div class="diff-empty-state">${t('git.selectAFileToLoadItsDiff')}</div>`;
     }
 
     const fileKind = getDiffFileKind(detail);
@@ -1310,9 +1311,9 @@ export class GitDiffViewController {
       return `
         ${includeHeader ? this.renderFileHeader(detail) : ''}
         <div class="diff-limit-card">
-          <strong>Large diff withheld</strong>
-          <span>This file diff is large enough to impact rendering performance.</span>
-          <button class="${buttonClassNames({ variant: 'secondary', extra: 'diff-load-full-btn' })}" type="button" data-load-full-diff data-diff-file-path="${escapeHtml(detail.path)}">Load full diff</button>
+          <strong>${t('git.largeDiffWithheld')}</strong>
+          <span>${t('git.thisFileDiffIsLargeEnoughToImpactRendering')}</span>
+          <button class="${buttonClassNames({ variant: 'secondary', extra: 'diff-load-full-btn' })}" type="button" data-load-full-diff data-diff-file-path="${escapeHtml(detail.path)}">${t('git.loadFullDiff')}</button>
         </div>
       `;
     }
@@ -1327,14 +1328,14 @@ export class GitDiffViewController {
   renderFocusedFileBody() {
     const currentFile = this.getCurrentFile();
     if (!currentFile) {
-      return '<div class="diff-empty-state">No changes to display.</div>';
+      return `<div class="diff-empty-state">${t('git.noChangesToDisplay')}</div>`;
     }
 
     if (this.isFileLoading(currentFile.path)) {
       return `
         <section class="diff-file-block">
           ${this.renderFileHeader(currentFile)}
-          <div class="diff-empty-state" role="status" aria-live="polite">Loading file diff…</div>
+          <div class="diff-empty-state" role="status" aria-live="polite">${t('git.loadingFileDiff')}</div>
         </section>
       `;
     }
@@ -1363,16 +1364,16 @@ export class GitDiffViewController {
 
     return `
       <section class="diff-commit-header">
-        <div class="diff-commit-subject">${escapeHtml(this.commitMeta.subject || this.commitMeta.shortHash || 'Commit')}</div>
+        <div class="diff-commit-subject">${escapeHtml(this.commitMeta.subject || this.commitMeta.shortHash || t('git.commit'))}</div>
         <div class="diff-commit-meta">
           <span>${escapeHtml(this.commitMeta.shortHash || '')}</span>
-          <span>${escapeHtml(this.commitMeta.authorName || 'Unknown')}</span>
-          <span title="${escapeHtml(this.commitMeta.authoredAt || '')}">${escapeHtml(this.commitMeta.relativeDateLabel || '')}</span>
-          ${this.commitMeta.isMergeCommit ? '<span>Merge commit</span>' : ''}
+          <span>${escapeHtml(this.commitMeta.authorName || t('common.unknown'))}</span>
+          <span title="${escapeHtml(this.commitMeta.authoredAt || '')}">${escapeHtml(formatRelativeDateLabel(this.commitMeta.authoredAt) || this.commitMeta.relativeDateLabel || '')}</span>
+          ${this.commitMeta.isMergeCommit ? `<span>${t('git.mergeCommit')}</span>` : ''}
         </div>
         <div class="diff-commit-meta diff-commit-meta-secondary">
           <span>${escapeHtml(this.commitMeta.hash || '')}</span>
-          <span>${Number(this.data?.summary?.filesChanged || 0)} file${Number(this.data?.summary?.filesChanged || 0) === 1 ? '' : 's'}</span>
+          <span>${t('git.file', { count: Number(this.data?.summary?.filesChanged || 0) })}</span>
         </div>
       </section>
     `;
@@ -1405,8 +1406,8 @@ export class GitDiffViewController {
     }).join('');
 
     return `
-      <aside class="diff-commit-index" aria-label="Changed files in commit">
-        <div class="diff-commit-index-header">Changed Files</div>
+      <aside class="diff-commit-index" aria-label="${t('git.changedFilesInCommit')}">
+        <div class="diff-commit-index-header">${t('git.changedFiles')}</div>
         <div class="diff-commit-index-list">
           ${items}
         </div>
@@ -1424,7 +1425,7 @@ export class GitDiffViewController {
     const bodyMarkup = isCollapsed
       ? ''
       : isLoading
-        ? '<div class="diff-empty-state" role="status" aria-live="polite">Loading file diff…</div>'
+        ? `<div class="diff-empty-state" role="status" aria-live="polite">${t('git.loadingFileDiff')}</div>`
         : errorMessage
           ? `<div class="diff-empty-state" role="alert">${escapeHtml(errorMessage)}</div>`
           : this.renderDiffDetail(detail, index, { includeHeader: false });
@@ -1810,7 +1811,7 @@ export class GitDiffViewController {
         return detail;
       } catch (error) {
         console.error('[git-diff] Failed to load file diff:', error);
-        const message = this.source === 'commit' ? 'Failed to load commit file diff' : 'Failed to load file diff';
+        const message = this.source === 'commit' ? t('git.failedToLoadCommitFileDiff') : t('git.failedToLoadFileDiff');
         this.fileErrors.set(filePath, message);
         this.toastController?.show(message);
         return null;
@@ -1833,11 +1834,11 @@ export class GitDiffViewController {
 
     if (this.fileIndicator) {
       if (isStackedCommit) {
-        this.fileIndicator.textContent = `${totalFiles} file${totalFiles === 1 ? '' : 's'}`;
+        this.fileIndicator.textContent = t('git.file', { count: totalFiles });
       } else {
         this.fileIndicator.textContent = totalFiles > 0
-          ? `${visibleIndex} of ${totalFiles}`
-          : '0 files';
+          ? t('git.visibleOfTotal', { visible: visibleIndex, total: totalFiles })
+          : t('git.n0Files');
       }
     }
 
@@ -1891,7 +1892,7 @@ export class GitDiffViewController {
     this.stats?.classList.remove('hidden');
 
     if (this.openEditorButton) {
-      this.openEditorButton.textContent = 'Open in editor';
+      this.openEditorButton.textContent = t('git.openInEditor');
     }
     this.openEditorButton?.toggleAttribute('disabled', !hasEditorFile || isCommitSource);
     if (this.primaryActionButton) {
@@ -1900,10 +1901,10 @@ export class GitDiffViewController {
       this.primaryActionButton.classList.toggle('ui-button--secondary', !emphasizeInclude);
       this.primaryActionButton.classList.toggle('ui-button--surface', !emphasizeInclude);
       this.primaryActionButton.textContent = this.pendingAction && this.pendingAction === primaryAction
-        ? 'Working…'
+        ? t('git.working')
         : primaryAction === 'unstage'
-          ? 'Remove'
-          : 'Include in commit';
+          ? t('common.remove')
+          : t('git.includeInCommit');
       this.primaryActionButton.toggleAttribute(
         'disabled',
         isCommitSource || !hasCurrentFile || !primaryAction || Boolean(this.pendingAction),
@@ -1911,7 +1912,7 @@ export class GitDiffViewController {
     }
     if (this.commitButton) {
       this.commitButton.textContent = this.pendingAction === 'commit'
-        ? 'Working…'
+        ? t('git.working')
         : commitButtonLabel(includedFileCount);
     }
     this.commitButton?.classList.toggle(
@@ -1938,7 +1939,7 @@ export class GitDiffViewController {
 
     const files = this.data?.files ?? [];
     if (files.length === 0) {
-      this.renderEmpty(this.source === 'commit' ? 'No commit changes to display.' : 'No changes to display.');
+      this.renderEmpty(this.source === 'commit' ? t('git.noCommitChangesToDisplay') : t('git.noChangesToDisplay'));
       return;
     }
 
@@ -1965,12 +1966,12 @@ export class GitDiffViewController {
     if (source === 'commit' || this.source === 'commit') {
       if (this.layoutMode === 'stacked') {
         if (this.commitMeta?.shortHash) {
-          return `Commit ${this.commitMeta.shortHash}`;
+          return t('git.commitHash', { hash: this.commitMeta.shortHash });
         }
         if (commitHash) {
-          return `Commit ${String(commitHash).slice(0, 7)}`;
+          return t('git.commitHash', { hash: String(commitHash).slice(0, 7) });
         }
-        return 'Commit Diff';
+        return t('git.commitDiff');
       }
 
       if (path) {
@@ -1980,12 +1981,12 @@ export class GitDiffViewController {
         return getVaultPathLeaf(this.activeFilePath);
       }
       if (this.commitMeta?.shortHash) {
-        return `Commit ${this.commitMeta.shortHash}`;
+        return t('git.commitHash', { hash: this.commitMeta.shortHash });
       }
       if (commitHash) {
-        return `Commit ${String(commitHash).slice(0, 7)}`;
+        return t('git.commitHash', { hash: String(commitHash).slice(0, 7) });
       }
-      return 'Commit Diff';
+      return t('git.commitDiff');
     }
 
     if (filePath) {
@@ -1993,13 +1994,13 @@ export class GitDiffViewController {
     }
 
     if (scope === 'staged') {
-      return 'Staged Changes';
+      return t('git.stagedChanges');
     }
 
     if (scope === 'working-tree') {
-      return 'Working Tree Changes';
+      return t('git.workingTreeChanges');
     }
 
-    return 'All Changes';
+    return t('git.allChanges');
   }
 }

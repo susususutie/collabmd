@@ -1,7 +1,7 @@
 import { resolveApiUrl } from '../domain/runtime-paths.js';
 import { parseApiResponse } from './api-client-utils.js';
 
-function request(path, { body = null, fallback = 'Request failed', method = 'GET' } = {}) {
+function request(path, { body = null, fallback = 'hosted.requestFailed', method = 'GET' } = {}) {
   return fetch(resolveApiUrl(path), {
     ...(body === null ? {} : { body: JSON.stringify(body) }),
     headers: { 'Content-Type': 'application/json' },
@@ -11,52 +11,52 @@ function request(path, { body = null, fallback = 'Request failed', method = 'GET
 
 export const hostedApiClient = {
   acceptInvitation() {
-    return request('/hosted/invitations/accept', { fallback: 'Failed to accept invitation', method: 'POST' });
+    return request('/hosted/invitations/accept', { fallback: 'hosted.failedToAcceptInvitation', method: 'POST' });
   },
 
   claimWorkspace({ teamName, token }) {
-    return request('/hosted/claim', { body: { teamName, token }, fallback: 'Failed to claim workspace', method: 'POST' });
+    return request('/hosted/claim', { body: { teamName, token }, fallback: 'hosted.failedToClaimWorkspace', method: 'POST' });
   },
 
   completeSetup() {
-    return request('/hosted/setup/complete', { fallback: 'Failed to complete setup', method: 'POST' });
+    return request('/hosted/setup/complete', { fallback: 'hosted.failedToCompleteSetup', method: 'POST' });
   },
 
   createInvitation({ email, role }) {
-    return request('/hosted/invitations', { body: { email, role }, fallback: 'Failed to create invitation', method: 'POST' });
+    return request('/hosted/invitations', { body: { email, role }, fallback: 'hosted.failedToCreateInvitation', method: 'POST' });
   },
 
   getStatus() {
-    return request('/hosted/status', { fallback: 'Failed to load workspace status' });
+    return request('/hosted/status', { fallback: 'hosted.failedToLoadWorkspaceStatus' });
   },
 
   listAuditEvents({ cursor = '', limit = 50 } = {}) {
     const query = new URLSearchParams({ limit: String(limit) });
     if (cursor) query.set('cursor', cursor);
-    return request(`/hosted/audit?${query}`, { fallback: 'Failed to load access history' });
+    return request(`/hosted/audit?${query}`, { fallback: 'hosted.failedToLoadAccessHistory' });
   },
 
   listInvitations() {
-    return request('/hosted/invitations', { fallback: 'Failed to load invitations' });
+    return request('/hosted/invitations', { fallback: 'hosted.failedToLoadInvitations' });
   },
 
   listMemberships() {
-    return request('/hosted/memberships', { fallback: 'Failed to load collaborators' });
+    return request('/hosted/memberships', { fallback: 'hosted.failedToLoadCollaborators' });
   },
 
   removeMembership(membershipId) {
-    return request(`/hosted/memberships/${encodeURIComponent(membershipId)}`, { fallback: 'Failed to remove collaborator', method: 'DELETE' });
+    return request(`/hosted/memberships/${encodeURIComponent(membershipId)}`, { fallback: 'hosted.failedToRemoveCollaborator', method: 'DELETE' });
   },
 
   revokeInvitation(invitationId) {
-    return request(`/hosted/invitations/${encodeURIComponent(invitationId)}`, { fallback: 'Failed to revoke invitation', method: 'DELETE' });
+    return request(`/hosted/invitations/${encodeURIComponent(invitationId)}`, { fallback: 'hosted.failedToRevokeInvitation', method: 'DELETE' });
   },
 
   updateInvitationRole(invitationId, role) {
-    return request(`/hosted/invitations/${encodeURIComponent(invitationId)}`, { body: { role }, fallback: 'Failed to update invitation', method: 'PATCH' });
+    return request(`/hosted/invitations/${encodeURIComponent(invitationId)}`, { body: { role }, fallback: 'hosted.failedToUpdateInvitation', method: 'PATCH' });
   },
 
   updateMembershipRole(membershipId, role) {
-    return request(`/hosted/memberships/${encodeURIComponent(membershipId)}`, { body: { role }, fallback: 'Failed to update role', method: 'PATCH' });
+    return request(`/hosted/memberships/${encodeURIComponent(membershipId)}`, { body: { role }, fallback: 'hosted.failedToUpdateRole', method: 'PATCH' });
   },
 };

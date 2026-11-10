@@ -1,3 +1,4 @@
+import { t } from '../i18n/index.js';
 import { createMarkdownStarter, normalizeVaultPathInput } from '../domain/vault-paths.js';
 import { resolveWikiTargetPath } from '../../domain/wiki-link-resolver.js';
 
@@ -27,13 +28,13 @@ export class WikiLinkFileController {
     }
 
     if (!this.wikiLinkAutoCreate) {
-      this.toastController.show('Wiki-link target does not exist');
+      this.toastController.show(t('file.wikiLinkTargetDoesNotExist'));
       return;
     }
 
     const normalizedPath = this.normalizeNewWikiFilePath(target);
     if (!normalizedPath) {
-      this.toastController.show('Cannot create an empty wiki-link target');
+      this.toastController.show(t('file.cannotCreateAnEmptyWikiLinkTarget'));
       return;
     }
 
@@ -59,7 +60,7 @@ export class WikiLinkFileController {
       await this.refreshExplorer();
       this.navigation.navigateToFile(filePath);
     } catch (error) {
-      this.toastController.show(`Failed to create file: ${error.message}`);
+      this.toastController.show(t('file.failedToCreateFileMessage', { message: error.message }));
     }
   }
 }

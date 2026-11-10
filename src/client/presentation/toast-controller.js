@@ -1,3 +1,5 @@
+import { t } from '../i18n/index.js';
+
 export class ToastController {
   constructor(container) {
     this.container = container;
@@ -50,8 +52,8 @@ export class ToastController {
       const dismissButton = document.createElement('button');
       dismissButton.className = 'toast__dismiss';
       dismissButton.type = 'button';
-      dismissButton.setAttribute('aria-label', 'Dismiss notification');
-      dismissButton.textContent = 'Close';
+      dismissButton.setAttribute('aria-label', t('app.dismissNotification'));
+      dismissButton.textContent = t('common.close');
       dismissButton.addEventListener('click', dismiss);
       toast.appendChild(dismissButton);
     }

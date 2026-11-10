@@ -17,6 +17,8 @@ const ALLOWED_RUNTIME_CSS_VARIABLES = new Set([
   '--app-viewport-offset-top',
   '--bases-card-swatch',
   '--depth',
+  // Set from i18n at runtime so pseudo-elements can show a localized label.
+  '--diagram-loading-label',
 ]);
 
 async function collectFiles(dirPath, pattern) {

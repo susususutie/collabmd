@@ -1,3 +1,4 @@
+import { t } from '../i18n/index.js';
 import { resolveApiUrl } from '../domain/runtime-paths.js';
 
 const READ_ONLY_CATEGORIES = Object.freeze([
@@ -59,7 +60,7 @@ export class PdfPreviewController {
     } catch {
       if (token !== this.renderToken) return;
       viewerHost.classList.add('pdf-file-preview-error');
-      viewerHost.textContent = 'This PDF could not be rendered in the browser.';
+      viewerHost.textContent = t('preview.thisPdfCouldNotBeRenderedInTheBrowser');
     }
   }
 

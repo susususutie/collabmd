@@ -1,3 +1,4 @@
+import { t } from '../../i18n/index.js';
 import { getUserAvatarTextColor } from '../../domain/room.js';
 
 const MAX_INLINE_AVATARS = 5;
@@ -53,7 +54,7 @@ function getPanelUsers(users, followedUserClientId) {
 
 function getUserFileLabel(context, user) {
   if (user.currentFile && user.currentFile === context.currentFilePath) {
-    return 'Here';
+    return t('collab.here');
   }
 
   if (user.currentFile) {
@@ -91,16 +92,16 @@ export const presenceFeature = {
     badge.classList.toggle('is-active', this.presencePanelOpen);
 
     if (effectiveConnectionState.status === 'connected') {
-      badge.textContent = `${this.globalUsers.length} online`;
+      badge.textContent = t('collab.countOnline', { count: this.globalUsers.length });
       badge.style.opacity = '1';
       badge.disabled = !hasUsers;
-      badge.setAttribute('aria-label', `Show ${this.globalUsers.length} online users`);
+      badge.setAttribute('aria-label', t('collab.showCountOnlineUsers', { count: this.globalUsers.length }));
       this.renderPresencePanel();
       return;
     }
 
     if (effectiveConnectionState.status === 'connecting') {
-      badge.textContent = effectiveConnectionState.unreachable ? 'Unreachable' : 'Connecting...';
+      badge.textContent = effectiveConnectionState.unreachable ? t('collab.unreachable') : t('collab.connecting');
       badge.style.opacity = '0.6';
       badge.disabled = true;
       badge.setAttribute('aria-label', badge.textContent);
@@ -108,10 +109,10 @@ export const presenceFeature = {
       return;
     }
 
-    badge.textContent = 'Offline';
+    badge.textContent = t('common.offline');
     badge.style.opacity = '0.6';
     badge.disabled = true;
-    badge.setAttribute('aria-label', 'Offline');
+    badge.setAttribute('aria-label', t('common.offline'));
     this.renderPresencePanel();
   },
 
@@ -141,11 +142,11 @@ export const presenceFeature = {
       if (user.isLocal) {
         const selfLabel = document.createElement('span');
         selfLabel.className = 'user-avatar-self-label';
-        selfLabel.textContent = 'You';
+        selfLabel.textContent = t('collab.you');
         avatar.appendChild(selfLabel);
-        avatar.title = `${user.name} (you) — ${fileLabel}`;
+        avatar.title = t('collab.nameYouFile', { name: user.name, file: fileLabel });
         avatar.setAttribute('role', 'img');
-        avatar.setAttribute('aria-label', `${user.name} (you) — ${fileLabel}`);
+        avatar.setAttribute('aria-label', t('collab.nameYouFile', { name: user.name, file: fileLabel }));
       } else {
         avatar.type = 'button';
         avatar.classList.add('user-avatar-button');
@@ -153,10 +154,10 @@ export const presenceFeature = {
           avatar.classList.add('different-file');
         }
         const avatarLabel = user.clientId === this.followedUserClientId
-          ? `Stop following ${user.name}`
+          ? t('collab.stopFollowingName', { name: user.name })
           : sameFile
-            ? `Follow ${user.name}`
-            : `Follow ${user.name} — ${fileLabel}`;
+            ? t('collab.followName', { name: user.name })
+            : t('collab.followNameFile', { name: user.name, file: fileLabel });
         avatar.title = avatarLabel;
         avatar.setAttribute('aria-label', avatarLabel);
         avatar.addEventListener('click', () => this.toggleFollowUser(user.clientId));
@@ -172,8 +173,8 @@ export const presenceFeature = {
       overflow.style.backgroundColor = 'var(--color-surface-dynamic)';
       overflow.style.color = 'var(--color-text-muted)';
       overflow.setAttribute('popovertarget', 'presencePanel');
-      overflow.setAttribute('aria-label', `Show ${visibleUsers.length} online users`);
-      overflow.title = `Show ${visibleUsers.length} online users`;
+      overflow.setAttribute('aria-label', t('collab.showCountOnlineUsers', { count: visibleUsers.length }));
+      overflow.title = t('collab.showCountOnlineUsers', { count: visibleUsers.length });
       const overflowLabel = document.createElement('span');
       overflowLabel.className = 'user-avatar-initial';
       overflowLabel.textContent = `+${visibleUsers.length - MAX_INLINE_AVATARS}`;
@@ -220,12 +221,12 @@ export const presenceFeature = {
       if (effectiveConnectionState.status === 'connected') {
         const remoteUserCount = this.globalUsers.filter((user) => !user.isLocal).length;
         status.textContent = remoteUserCount === 0
-          ? 'You’re the only person here right now.'
-          : `${remoteUserCount} ${remoteUserCount === 1 ? 'teammate' : 'teammates'} online. Select someone to follow.`;
+          ? t('collab.youReTheOnlyPersonHereRightNow')
+          : t('collab.teammateOnlineSelectSomeoneToFollow', { count: remoteUserCount });
       } else if (effectiveConnectionState.status === 'connecting') {
-        status.textContent = effectiveConnectionState.unreachable ? 'Server unreachable.' : 'Connecting presence...';
+        status.textContent = effectiveConnectionState.unreachable ? t('collab.serverUnreachable2') : t('collab.connectingPresence');
       } else {
-        status.textContent = 'Presence is offline.';
+        status.textContent = t('collab.presenceIsOffline');
       }
     }
 
@@ -235,8 +236,8 @@ export const presenceFeature = {
       const emptyState = document.createElement('div');
       emptyState.className = 'presence-panel-empty-state';
       emptyState.textContent = effectiveConnectionState.status === 'connected'
-        ? 'Nobody else is here yet.'
-        : 'Presence will appear here when the connection is active.';
+        ? t('collab.nobodyElseIsHereYet')
+        : t('collab.presenceWillAppearHereWhenTheConnectionIsActive');
       list.appendChild(emptyState);
       return;
     }
@@ -272,12 +273,12 @@ export const presenceFeature = {
       if (user.isLocal) {
         const youBadge = document.createElement('span');
         youBadge.className = 'presence-panel-user-badge';
-        youBadge.textContent = 'You';
+        youBadge.textContent = t('collab.you');
         topLine.appendChild(youBadge);
       } else if (user.clientId === this.followedUserClientId) {
         const followingBadge = document.createElement('span');
         followingBadge.className = 'presence-panel-user-badge';
-        followingBadge.textContent = 'Following';
+        followingBadge.textContent = t('collab.following');
         topLine.appendChild(followingBadge);
       }
 
@@ -290,15 +291,15 @@ export const presenceFeature = {
 
       if (user.isLocal) {
         primaryAction.setAttribute('role', 'group');
-        primaryAction.setAttribute('aria-label', `${user.name} (you) — ${file.textContent}`);
+        primaryAction.setAttribute('aria-label', t('collab.nameYouFile', { name: user.name, file: file.textContent }));
       } else {
         const isFollowing = user.clientId === this.followedUserClientId;
         primaryAction.type = 'button';
         primaryAction.setAttribute(
           'aria-label',
           isFollowing
-            ? `Keep following ${user.name}`
-            : `Follow ${user.name} — ${file.textContent}`,
+            ? t('collab.keepFollowingName', { name: user.name })
+            : t('collab.followNameFile', { name: user.name, file: file.textContent }),
         );
         primaryAction.addEventListener('click', () => {
           this.startFollowingUser(user.clientId, { closePanel: true });
@@ -311,8 +312,8 @@ export const presenceFeature = {
         const stopButton = document.createElement('button');
         stopButton.type = 'button';
         stopButton.className = 'presence-panel-user-stop';
-        stopButton.textContent = 'Stop';
-        stopButton.setAttribute('aria-label', `Stop following ${user.name}`);
+        stopButton.textContent = t('common.stop');
+        stopButton.setAttribute('aria-label', t('collab.stopFollowingName', { name: user.name }));
         stopButton.addEventListener('click', (event) => {
           event.stopPropagation();
           this.stopFollowingUser({ closePanel: true });

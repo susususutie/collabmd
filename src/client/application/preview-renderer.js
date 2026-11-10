@@ -1,3 +1,4 @@
+import { t } from '../i18n/index.js';
 import { MermaidPreviewHydrator } from './mermaid-preview-hydrator.js';
 import { PlantUmlPreviewHydrator } from './plantuml-preview-hydrator.js';
 import { DiagramChrome } from './diagram-chrome.js';
@@ -195,7 +196,7 @@ export class PreviewRenderer {
     const shell = document.createElement('div');
     shell.className = 'preview-shell';
     shell.style.minHeight = `${reservedHeight}px`;
-    shell.textContent = 'Rendering preview…';
+    shell.textContent = t('preview.renderingPreview');
     renderHost?.append(shell);
     this.setPhase('shell');
   }
@@ -372,7 +373,7 @@ export class PreviewRenderer {
     block.dataset.collapsed = collapsed ? 'true' : 'false';
     if (toggle instanceof HTMLButtonElement) {
       toggle.setAttribute('aria-expanded', collapsed ? 'false' : 'true');
-      toggle.textContent = collapsed ? 'Show' : 'Hide';
+      toggle.textContent = collapsed ? t('common.show') : t('common.hide');
     }
     if (summary instanceof HTMLElement) {
       summary.hidden = !collapsed;

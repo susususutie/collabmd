@@ -1,4 +1,5 @@
 import { createFileSearchEntry, findFileSearchMatch } from '../domain/file-search.js';
+import { t } from '../i18n/index.js';
 
 export function openCanvasPicker({ root, title, loadChoices, onChoose, canChoose }) {
   const previousFocus = document.activeElement;
@@ -11,7 +12,7 @@ export function openCanvasPicker({ root, title, loadChoices, onChoose, canChoose
   const closeButton = document.createElement('button');
   closeButton.type = 'button';
   closeButton.className = 'canvas-button';
-  closeButton.textContent = 'Close';
+  closeButton.textContent = t('common.close');
   const header = document.createElement('header');
   header.append(heading, closeButton);
   const input = document.createElement('input');
@@ -26,12 +27,12 @@ export function openCanvasPicker({ root, title, loadChoices, onChoose, canChoose
   list.id = `${heading.id}-results`;
   list.className = 'canvas-picker-results';
   list.setAttribute('role', 'listbox');
-  list.setAttribute('aria-label', 'Suggestions');
+  list.setAttribute('aria-label', t('canvas.suggestions'));
   input.setAttribute('aria-controls', list.id);
   const status = document.createElement('p');
   status.className = 'canvas-picker-status';
   status.setAttribute('role', 'status');
-  status.textContent = 'Loading…';
+  status.textContent = t('canvas.loading');
   dialog.append(header, input, list, status);
   root.append(dialog);
   let choices = [];
@@ -47,7 +48,7 @@ export function openCanvasPicker({ root, title, loadChoices, onChoose, canChoose
   };
   const choose = (choice) => {
     if (!choice) return;
-    if (!canChoose()) { status.textContent = 'This selection is no longer available. Close and try again.'; return; }
+    if (!canChoose()) { status.textContent = t('canvas.thisSelectionIsNoLongerAvailableCloseAndTryAgain'); return; }
     close();
     onChoose(choice.value);
   };
@@ -79,8 +80,8 @@ export function openCanvasPicker({ root, title, loadChoices, onChoose, canChoose
       option.addEventListener('click', () => choose(choice));
       return option;
     }));
-    status.textContent = matches.length > 100 ? 'Showing the first 100 matches. Type to narrow the list.'
-      : (matches.length ? '↑ ↓ to navigate · Enter to choose · Esc to close' : 'No matches.');
+    status.textContent = matches.length > 100 ? t('canvas.showingTheFirst100MatchesTypeToNarrowTheList')
+      : (matches.length ? t('canvas.toNavigateEnterToChooseEscToClose') : t('canvas.noMatches'));
     select(0);
   };
   closeButton.addEventListener('click', close);
@@ -106,6 +107,6 @@ export function openCanvasPicker({ root, title, loadChoices, onChoose, canChoose
     if (closed) return;
     choices = loaded.map((choice) => ({ ...choice, search: createFileSearchEntry(choice.searchText || `${choice.label} ${choice.detail || ''}`) }));
     render();
-  }).catch(() => { if (!closed) status.textContent = 'Suggestions unavailable. Close and try again.'; });
+  }).catch(() => { if (!closed) status.textContent = t('canvas.suggestionsUnavailableCloseAndTryAgain'); });
   return { close };
 }

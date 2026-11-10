@@ -6,7 +6,12 @@ import {
   waitForBootstrapPayload,
   waitForRenderedExportContent,
 } from './export-pipeline.js';
+import { t, initializeI18n, applyDocumentLocale, localizeDocument } from '../i18n/index.js';
 import { groupHeadingWithFollowingBlock } from './export-print-layout.js';
+
+initializeI18n();
+applyDocumentLocale();
+localizeDocument();
 
 function getExportJobId() {
   return new URLSearchParams(window.location.search).get('job') || window.name || '';
@@ -42,7 +47,7 @@ function renderSnapshot(snapshot) {
     return null;
   }
 
-  document.title = `${snapshot.title} — Export`;
+  document.title = t('export.titleExport', { title: snapshot.title });
   const parsed = new DOMParser().parseFromString(`<body>${snapshot.html}</body>`, 'text/html');
   mount.replaceChildren(...parsed.body.childNodes);
   groupHeadingWithFollowingBlock(mount);
@@ -52,7 +57,7 @@ function renderSnapshot(snapshot) {
 
 async function bootstrap() {
   try {
-    setStatus('Loading export content…');
+    setStatus(t('export.loadingExportContent'));
     const payload = await waitForBootstrapPayload();
     document.documentElement.dataset.theme = payload.theme;
     document.body.dataset.theme = payload.theme;
@@ -62,15 +67,15 @@ async function bootstrap() {
     const mount = renderSnapshot(snapshot);
     snapshot.html = await waitForRenderedExportContent(mount);
     setStatus(payload.action === 'pdf'
-      ? 'Opening print dialog…'
-      : `Preparing ${payload.action.toUpperCase()} download…`);
+      ? t('export.openingPrintDialog')
+      : t('export.preparingFormatDownload', { format: payload.action.toUpperCase() }));
     await runExportAdapter(snapshot, payload.action);
     setStatus(payload.action === 'pdf'
-      ? 'Print dialog opened.'
-      : `${payload.action.toUpperCase()} download started.`);
+      ? t('export.printDialogOpened')
+      : t('export.formatDownloadStarted', { format: payload.action.toUpperCase() }));
     postExportPageMessage('complete', { jobId: getExportJobId() });
   } catch (error) {
-    const message = error instanceof Error ? error.message : 'Export failed';
+    const message = error instanceof Error ? error.message : t('export.exportFailed');
     setStatus(message);
     postExportPageMessage('error', {
       jobId: getExportJobId(),

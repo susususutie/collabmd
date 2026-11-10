@@ -1,4 +1,5 @@
 import { createFragment, escapeHtml } from '../domain/vault-utils.js';
+import { t } from '../i18n/index.js';
 
 function formatDate(value) {
   return value ? new Date(value).toLocaleString() : '—';
@@ -6,7 +7,7 @@ function formatDate(value) {
 
 function roleOptions(currentRole) {
   return ['collaborator', 'admin'].map((role) => (
-    `<option value="${role}"${role === currentRole ? ' selected' : ''}>${role === 'admin' ? 'Admin' : 'Collaborator'}</option>`
+    `<option value="${role}"${role === currentRole ? ' selected' : ''}>${role === 'admin' ? t('common.admin') : t('team.collaborator')}</option>`
   )).join('');
 }
 
@@ -16,7 +17,7 @@ function auditEventsMarkup(events) {
       <div class="team-settings-row-main">
         <strong>${escapeHtml(event.type)}</strong>
         <span>${escapeHtml(event.targetEmail || '')}${event.targetRole ? ` · ${escapeHtml(event.targetRole)}` : ''}</span>
-        <small>By ${escapeHtml(event.actorName || event.actorEmail)} · ${formatDate(event.createdAt)}</small>
+        <small>${t('team.byActorDate', { actor: escapeHtml(event.actorName || event.actorEmail), date: formatDate(event.createdAt) })}</small>
       </div>
     </li>`).join('');
 }
@@ -47,7 +48,7 @@ export class TeamSettingsController {
   async open() {
     this.closeToolbarMenu?.();
     this.dialog?.showModal?.();
-    this.renderStatus('Loading team settings…');
+    this.renderStatus(t('team.loadingTeamSettings'));
     await this.refresh();
   }
 
@@ -78,66 +79,66 @@ export class TeamSettingsController {
           <div class="team-settings-row-main">
             <strong>${escapeHtml(membership.name || membership.email)}</strong>
             <span>${escapeHtml(membership.email)}</span>
-            <small>Joined ${formatDate(membership.joinedAt)}</small>
+            <small>${t('team.joinedDate', { date: formatDate(membership.joinedAt) })}</small>
           </div>
-          <label class="team-settings-row-role">Role
+          <label class="team-settings-row-role">${t('team.role')}
             <select class="ui-input ui-input--compact" data-membership-role="${escapeHtml(membership.id)}">
               ${roleOptions(membership.role)}
             </select>
           </label>
-          <button class="ui-button ui-button--secondary ui-button--compact" type="button" data-membership-remove="${escapeHtml(membership.id)}" data-membership-email="${escapeHtml(membership.email)}">Remove</button>
+          <button class="ui-button ui-button--secondary ui-button--compact" type="button" data-membership-remove="${escapeHtml(membership.id)}" data-membership-email="${escapeHtml(membership.email)}">${t('common.remove')}</button>
         </li>`).join('')
-      : '<p class="team-settings-empty">No collaborators yet.</p>';
+      : `<p class="team-settings-empty">${t('team.noCollaboratorsYet')}</p>`;
     const invitationMarkup = invitations.length > 0
       ? invitations.map((invitation) => `
         <li class="team-settings-row">
           <div class="team-settings-row-main">
             <strong>${escapeHtml(invitation.email)}</strong>
-            <span>Invited by ${escapeHtml(invitation.invitedByName || invitation.invitedByEmail)}</span>
-            <small>Expires ${formatDate(invitation.expiresAt)}</small>
+            <span>${t('team.invitedByName', { name: escapeHtml(invitation.invitedByName || invitation.invitedByEmail) })}</span>
+            <small>${t('team.expiresDate', { date: formatDate(invitation.expiresAt) })}</small>
           </div>
-          <label class="team-settings-row-role">Role
+          <label class="team-settings-row-role">${t('team.role')}
             <select class="ui-input ui-input--compact" data-invitation-role="${escapeHtml(invitation.id)}">
               ${roleOptions(invitation.role)}
             </select>
           </label>
-          <button class="ui-button ui-button--secondary ui-button--compact" type="button" data-invitation-revoke="${escapeHtml(invitation.id)}" data-invitation-email="${escapeHtml(invitation.email)}">Revoke</button>
+          <button class="ui-button ui-button--secondary ui-button--compact" type="button" data-invitation-revoke="${escapeHtml(invitation.id)}" data-invitation-email="${escapeHtml(invitation.email)}">${t('team.revoke')}</button>
         </li>`).join('')
-      : '<p class="team-settings-empty">No pending invitations.</p>';
+      : `<p class="team-settings-empty">${t('team.noPendingInvitations')}</p>`;
     const auditMarkup = auditEvents.length > 0
       ? auditEventsMarkup(auditEvents)
-      : '<p class="team-settings-empty">No access history yet.</p>';
+      : `<p class="team-settings-empty">${t('team.noAccessHistoryYet')}</p>`;
     this.content.replaceChildren(createFragment(`
       <section class="team-settings-section">
-        <h3>Collaborators</h3>
+        <h3>${t('team.collaborators')}</h3>
         <ul class="team-settings-list">${memberMarkup}</ul>
       </section>
       <section class="team-settings-section">
-        <h3>Pending invitations</h3>
+        <h3>${t('team.pendingInvitations')}</h3>
         <ul class="team-settings-list">${invitationMarkup}</ul>
         <form class="team-settings-invite-form" data-invite-form>
           <label class="app-dialog-field">
-            <span class="app-dialog-label">Email</span>
+            <span class="app-dialog-label">${t('common.email')}</span>
             <input class="ui-input" name="email" type="email" maxlength="254" autocomplete="off" spellcheck="false" required placeholder="teammate@example.com">
           </label>
           <label class="app-dialog-field">
-            <span class="app-dialog-label">Role</span>
+            <span class="app-dialog-label">${t('team.role')}</span>
             <select class="ui-input" name="role">
-              <option value="collaborator">Collaborator</option>
-              <option value="admin">Admin</option>
+              <option value="collaborator">${t('team.collaborator')}</option>
+              <option value="admin">${t('common.admin')}</option>
             </select>
           </label>
-          <button class="ui-button ui-button--primary" type="submit">Invite</button>
+          <button class="ui-button ui-button--primary" type="submit">${t('team.invite')}</button>
         </form>
-        <p class="team-settings-note">Share this workspace URL with the invited person. They sign in with the matching Google email, then accept the invitation. Email delivery is not set up yet.</p>
+        <p class="team-settings-note">${t('team.shareThisWorkspaceUrlWithTheInvitedPersonThey')}</p>
       </section>
       <section class="team-settings-section">
-        <h3>Access history</h3>
-        <ul class="team-settings-list team-settings-list--audit" tabindex="-1" aria-label="Access history">${auditMarkup}</ul>
-        ${nextAuditCursor ? `<button class="ui-button ui-button--secondary ui-button--compact" type="button" data-audit-more="${escapeHtml(nextAuditCursor)}">Load more history</button>` : ''}
+        <h3>${t('team.accessHistory')}</h3>
+        <ul class="team-settings-list team-settings-list--audit" tabindex="-1" aria-label="${t('team.accessHistory')}">${auditMarkup}</ul>
+        ${nextAuditCursor ? `<button class="ui-button ui-button--secondary ui-button--compact" type="button" data-audit-more="${escapeHtml(nextAuditCursor)}">${t('team.loadMoreHistory')}</button>` : ''}
       </section>
       <div class="team-settings-actions">
-        <button class="ui-button ui-button--ghost" type="button" data-team-close>Close</button>
+        <button class="ui-button ui-button--ghost" type="button" data-team-close>${t('common.close')}</button>
       </div>
       <p class="team-settings-live" role="status" aria-live="polite"></p>
     `));
@@ -152,7 +153,7 @@ export class TeamSettingsController {
     try {
       await this.loadOverview();
     } catch (error) {
-      this.renderStatus(error.message || 'Failed to load team settings', { error: true });
+      this.renderStatus(error.message || t('team.failedToLoadTeamSettings'), { error: true });
     }
   }
 
@@ -170,10 +171,10 @@ export class TeamSettingsController {
         if (document.activeElement === button) list.focus();
         button.remove();
       }
-      this.setLiveMessage('More access history loaded');
+      this.setLiveMessage(t('team.moreAccessHistoryLoaded'));
     } catch (error) {
       if (this.content?.contains(button)) {
-        this.setLiveMessage(error.message || 'Failed to load access history');
+        this.setLiveMessage(error.message || t('team.failedToLoadAccessHistory'));
       }
     } finally {
       button.disabled = false;
@@ -192,24 +193,24 @@ export class TeamSettingsController {
       return;
     }
     if (target.dataset.membershipRemove) {
-      if (!window.confirm(`Remove ${target.dataset.membershipEmail} from the team? They lose workspace access immediately.`)) return;
+      if (!window.confirm(t('team.removeEmailFromTheTeamTheyLoseWorkspaceAccess', { email: target.dataset.membershipEmail }))) return;
       try {
         await this.apiClient.removeMembership(target.dataset.membershipRemove);
         await this.refresh();
-        this.setLiveMessage('Collaborator removed');
+        this.setLiveMessage(t('team.collaboratorRemoved'));
       } catch (error) {
-        this.toastController?.show(error.message || 'Failed to remove collaborator');
+        this.toastController?.show(error.message || t('team.failedToRemoveCollaborator'));
       }
       return;
     }
     if (target.dataset.invitationRevoke) {
-      if (!window.confirm(`Revoke the invitation for ${target.dataset.invitationEmail}?`)) return;
+      if (!window.confirm(t('team.revokeTheInvitationForEmail', { email: target.dataset.invitationEmail }))) return;
       try {
         await this.apiClient.revokeInvitation(target.dataset.invitationRevoke);
         await this.refresh();
-        this.setLiveMessage('Invitation revoked');
+        this.setLiveMessage(t('team.invitationRevoked'));
       } catch (error) {
-        this.toastController?.show(error.message || 'Failed to revoke invitation');
+        this.toastController?.show(error.message || t('team.failedToRevokeInvitation'));
       }
     }
   }
@@ -220,9 +221,9 @@ export class TeamSettingsController {
       try {
         await this.apiClient.updateMembershipRole(membershipSelect.dataset.membershipRole, membershipSelect.value);
         await this.refresh();
-        this.setLiveMessage('Role updated');
+        this.setLiveMessage(t('team.roleUpdated'));
       } catch (error) {
-        this.toastController?.show(error.message || 'Failed to update role');
+        this.toastController?.show(error.message || t('team.failedToUpdateRole'));
         await this.refresh();
       }
       return;
@@ -232,9 +233,9 @@ export class TeamSettingsController {
       try {
         await this.apiClient.updateInvitationRole(invitationSelect.dataset.invitationRole, invitationSelect.value);
         await this.refresh();
-        this.setLiveMessage('Invitation role updated');
+        this.setLiveMessage(t('team.invitationRoleUpdated'));
       } catch (error) {
-        this.toastController?.show(error.message || 'Failed to update invitation');
+        this.toastController?.show(error.message || t('team.failedToUpdateInvitation'));
         await this.refresh();
       }
     }
@@ -253,9 +254,9 @@ export class TeamSettingsController {
         role: data.get('role'),
       });
       await this.refresh();
-      this.setLiveMessage('Invitation created — share the workspace URL with the invited person.');
+      this.setLiveMessage(t('team.invitationCreatedShareTheWorkspaceUrlWithThe'));
     } catch (error) {
-      this.setLiveMessage(error.message || 'Failed to create invitation');
+      this.setLiveMessage(error.message || t('team.failedToCreateInvitation'));
       submit.disabled = false;
     }
   }

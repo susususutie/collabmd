@@ -1,3 +1,4 @@
+import { t } from '../i18n/index.js';
 const MIN_SCALE = 1;
 const MAX_SCALE = 6;
 const ZOOM_STEP = 0.25;
@@ -454,7 +455,7 @@ export class ImageLightboxController {
     const backdrop = this.document.createElement('button');
     backdrop.className = 'image-lightbox-backdrop';
     backdrop.type = 'button';
-    backdrop.setAttribute('aria-label', 'Close image preview');
+    backdrop.setAttribute('aria-label', t('app.closeImagePreview'));
     backdrop.addEventListener('click', (event) => {
       event.preventDefault();
       event.stopPropagation();
@@ -472,7 +473,7 @@ export class ImageLightboxController {
     const title = this.document.createElement('div');
     title.className = 'image-lightbox-title';
     title.id = 'imageLightboxTitle';
-    title.textContent = 'Image preview';
+    title.textContent = t('app.imagePreview');
 
     const controls = this.document.createElement('div');
     controls.className = 'image-lightbox-controls';

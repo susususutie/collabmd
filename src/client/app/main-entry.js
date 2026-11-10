@@ -1,10 +1,14 @@
 import { CollabMdAppShell } from '../bootstrap/collabmd-app-shell.js';
+import { applyDocumentLocale, initializeI18n, localizeDocument, t } from '../i18n/index.js';
 import { ensureClientAuthenticated } from '../infrastructure/auth-client.js';
 import { getRuntimeConfig, initializeWorkspaceUrl, setActiveVaultId } from '../infrastructure/runtime-config.js';
 import { renderVaultDashboard } from '../presentation/vault-dashboard.js';
 import '../styles/style.css';
 
 async function start() {
+  initializeI18n();
+  applyDocumentLocale();
+  localizeDocument();
   await ensureClientAuthenticated();
   const config = getRuntimeConfig();
   const url = new URL(window.location.href);
@@ -32,7 +36,7 @@ async function start() {
 function startWorkspace() {
   void start().catch(() => {
     const status = document.getElementById('workspaceLoading');
-    if (status) status.textContent = 'Unable to open the workspace. Reload to try again.';
+    if (status) status.textContent = t('app.unableToOpenTheWorkspaceReloadToTryAgain');
   });
 }
 

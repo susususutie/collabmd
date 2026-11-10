@@ -8,6 +8,7 @@ import {
   getFrameViewportSize,
 } from './preview-diagram-utils.js';
 import { clamp } from '../domain/vault-utils.js';
+import { t } from '../i18n/index.js';
 import { downloadBlob } from '../browser-utils.js';
 
 const DIAGRAM_CHROME_ZOOM = Object.freeze({
@@ -268,15 +269,15 @@ export class DiagramChrome {
     const rightGroup = this.document.createElement('div');
     rightGroup.className = 'diagram-preview-toolbar-group diagram-preview-toolbar-group--actions';
 
-    const decreaseButton = this.createButton(kind, '−', 'Zoom out');
-    const increaseButton = this.createButton(kind, '+', 'Zoom in');
-    const resetButton = this.createButton(kind, '', 'Reset zoom', { icon: 'fit' });
-    const copyButton = this.createButton(kind, '', 'Copy image', { icon: 'copy' });
-    const downloadButton = this.createButton(kind, '', 'Download SVG', { icon: 'download' });
+    const decreaseButton = this.createButton(kind, '−', t('common.zoomOut'));
+    const increaseButton = this.createButton(kind, '+', t('common.zoomIn'));
+    const resetButton = this.createButton(kind, '', t('diagram.resetZoom'), { icon: 'fit' });
+    const copyButton = this.createButton(kind, '', t('diagram.copyImage'), { icon: 'copy' });
+    const downloadButton = this.createButton(kind, '', t('diagram.downloadSvg'), { icon: 'download' });
     const reloadButton = includeReload
-      ? this.createButton(kind, '', 'Reload diagram', { icon: 'refresh' })
+      ? this.createButton(kind, '', t('diagram.reloadDiagram'), { icon: 'refresh' })
       : null;
-    const maximizeButton = this.createButton(kind, '', 'Maximize diagram', { icon: 'maximize' });
+    const maximizeButton = this.createButton(kind, '', t('diagram.maximizeDiagram'), { icon: 'maximize' });
     maximizeButton.classList.add(config.maximizeButtonClassName);
     const zoomLabel = this.document.createElement('span');
     zoomLabel.className = config.zoomLabelClassName;
@@ -321,13 +322,13 @@ export class DiagramChrome {
       const pngBlob = await rasterizeSvgMarkupToPngBlob(await exportSvgMarkup());
       try {
         await writeBlobToClipboard(pngBlob);
-        this.toastController?.show?.('Diagram copied');
+        this.toastController?.show?.(t('diagram.diagramCopied'));
       } catch {
         downloadBlob(pngBlob, pngFileName);
-        this.toastController?.show?.('Clipboard image copy is unavailable here. Downloaded PNG instead.');
+        this.toastController?.show?.(t('diagram.clipboardImageCopyIsUnavailableHereDownloadedPng'));
       }
     } catch {
-      this.toastController?.show?.('Failed to copy diagram');
+      this.toastController?.show?.(t('diagram.failedToCopyDiagram'));
     }
   }
 
@@ -336,16 +337,16 @@ export class DiagramChrome {
       const { svgFileName } = exportFileNames();
       const svgBlob = new Blob([await exportSvgMarkup()], { type: 'image/svg+xml;charset=utf-8' });
       downloadBlob(svgBlob, svgFileName);
-      this.toastController?.show?.('Diagram download started');
+      this.toastController?.show?.(t('diagram.diagramDownloadStarted'));
     } catch {
-      this.toastController?.show?.('Failed to download diagram');
+      this.toastController?.show?.(t('diagram.failedToDownloadDiagram'));
     }
   }
 
   syncMaximizeButtonState(shell, maximizeButton) {
     const isMaximized = shell.classList.contains('is-maximized');
     setDiagramActionButtonIcon(maximizeButton, isMaximized ? 'restore' : 'maximize');
-    const label = isMaximized ? 'Restore diagram size' : 'Maximize diagram';
+    const label = isMaximized ? t('diagram.restoreDiagramSize') : t('diagram.maximizeDiagram');
     maximizeButton.setAttribute('aria-label', label);
     maximizeButton.title = label;
   }

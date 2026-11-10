@@ -1,3 +1,5 @@
+import { t } from '../i18n/index.js';
+
 const ICONS = Object.freeze({
   bold: `
     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
@@ -97,109 +99,109 @@ const ICONS = Object.freeze({
 const BLOCK_MENU_ACTIONS = Object.freeze([
   {
     action: 'paragraph',
-    label: 'Paragraph',
+    label: t('editor.paragraph'),
     shortLabel: 'P',
-    title: 'Paragraph',
+    title: t('editor.paragraph'),
   },
   {
     action: 'heading-1',
-    label: 'Heading 1',
+    label: t('editor.heading1'),
     shortLabel: 'H1',
-    title: 'Heading 1',
+    title: t('editor.heading1'),
   },
   {
     action: 'heading-2',
-    label: 'Heading 2',
+    label: t('editor.heading2'),
     shortLabel: 'H2',
-    title: 'Heading 2',
+    title: t('editor.heading2'),
   },
   {
     action: 'heading-3',
-    label: 'Heading 3',
+    label: t('editor.heading3'),
     shortLabel: 'H3',
-    title: 'Heading 3',
+    title: t('editor.heading3'),
   },
   {
     action: 'heading-4',
-    label: 'Heading 4',
+    label: t('editor.heading4'),
     shortLabel: 'H4',
-    title: 'Heading 4',
+    title: t('editor.heading4'),
   },
   {
     action: 'heading-5',
-    label: 'Heading 5',
+    label: t('editor.heading5'),
     shortLabel: 'H5',
-    title: 'Heading 5',
+    title: t('editor.heading5'),
   },
   {
     action: 'heading-6',
-    label: 'Heading 6',
+    label: t('editor.heading6'),
     shortLabel: 'H6',
-    title: 'Heading 6',
+    title: t('editor.heading6'),
   },
   {
     action: 'quote',
-    label: 'Quote',
+    label: t('editor.quote'),
     shortLabel: 'Quote',
-    title: 'Block quote',
+    title: t('editor.blockQuote'),
   },
   {
     action: 'bullet-list',
-    label: 'Bullet list',
+    label: t('editor.bulletList'),
     shortLabel: 'List',
-    title: 'Bullet list',
+    title: t('editor.bulletList'),
   },
   {
     action: 'numbered-list',
-    label: 'Numbered list',
+    label: t('editor.numberedList'),
     shortLabel: '1.',
-    title: 'Numbered list',
+    title: t('editor.numberedList'),
   },
   {
     action: 'task-list',
-    label: 'Task list',
+    label: t('editor.taskList'),
     shortLabel: 'Task',
-    title: 'Task list',
+    title: t('editor.taskList'),
   },
   {
     action: 'code-block',
-    label: 'Code block',
+    label: t('editor.codeBlock'),
     shortLabel: 'Code',
-    title: 'Code block',
+    title: t('editor.codeBlock'),
   },
 ]);
 
 const INLINE_ACTIONS = Object.freeze([
-  { action: 'bold', label: 'Bold', title: 'Bold', icon: ICONS.bold },
-  { action: 'italic', label: 'Italic', title: 'Italic', icon: ICONS.italic },
-  { action: 'strikethrough', label: 'Strikethrough', title: 'Strikethrough', icon: ICONS.strikethrough },
-  { action: 'code', label: 'Inline code', title: 'Inline code', icon: ICONS.code },
+  { action: 'bold', label: t('editor.bold'), title: t('editor.bold'), icon: ICONS.bold },
+  { action: 'italic', label: t('editor.italic'), title: t('editor.italic'), icon: ICONS.italic },
+  { action: 'strikethrough', label: t('editor.strikethrough'), title: t('editor.strikethrough'), icon: ICONS.strikethrough },
+  { action: 'code', label: t('editor.inlineCode'), title: t('editor.inlineCode'), icon: ICONS.code },
 ]);
 
 const MOBILE_EDIT_COMMANDS = Object.freeze([
-  { commandId: 'undo', label: 'Undo', title: 'Undo', icon: ICONS.undo },
-  { commandId: 'redo', label: 'Redo', title: 'Redo', icon: ICONS.redo },
-  { commandId: 'indentMore', label: 'Indent', title: 'Indent', icon: ICONS.indent },
-  { commandId: 'indentLess', label: 'Outdent', title: 'Outdent', icon: ICONS.outdent },
+  { commandId: 'undo', label: t('common.undo'), title: t('common.undo'), icon: ICONS.undo },
+  { commandId: 'redo', label: t('common.redo'), title: t('common.redo'), icon: ICONS.redo },
+  { commandId: 'indentMore', label: t('editor.indent'), title: t('editor.indent'), icon: ICONS.indent },
+  { commandId: 'indentLess', label: t('editor.outdent'), title: t('editor.outdent'), icon: ICONS.outdent },
 ]);
 
 const MEDIA_ACTIONS = Object.freeze([
-  { action: 'link', label: 'Insert link', title: 'Insert link', icon: ICONS.link },
-  { action: 'image', label: 'Insert image', title: 'Insert image', icon: ICONS.image },
-  { action: 'video', label: 'Insert video', title: 'Insert video', icon: ICONS.video },
+  { action: 'link', label: t('editor.insertLink'), title: t('editor.insertLink'), icon: ICONS.link },
+  { action: 'image', label: t('editor.insertImage'), title: t('editor.insertImage'), icon: ICONS.image },
+  { action: 'video', label: t('editor.insertVideo'), title: t('editor.insertVideo'), icon: ICONS.video },
 ]);
 
 const INSERT_ACTIONS = Object.freeze([
-  { action: 'table', label: 'Insert table', title: 'Insert table', icon: ICONS.table },
-  { action: 'horizontal-rule', label: 'Insert horizontal rule', title: 'Insert horizontal rule', icon: ICONS.horizontalRule },
+  { action: 'table', label: t('editor.insertTable'), title: t('editor.insertTable'), icon: ICONS.table },
+  { action: 'horizontal-rule', label: t('editor.insertHorizontalRule'), title: t('editor.insertHorizontalRule'), icon: ICONS.horizontalRule },
 ]);
 
 export const markdownToolbarLayout = Object.freeze([
-  { kind: 'buttons', groupLabel: 'Edit', actions: MOBILE_EDIT_COMMANDS, mobileOnly: true },
+  { kind: 'buttons', groupLabel: t('common.edit'), actions: MOBILE_EDIT_COMMANDS, mobileOnly: true },
   { kind: 'block-menu', actions: BLOCK_MENU_ACTIONS },
-  { kind: 'buttons', groupLabel: 'Inline formatting', actions: INLINE_ACTIONS },
-  { kind: 'buttons', groupLabel: 'Media and links', actions: MEDIA_ACTIONS },
-  { kind: 'buttons', groupLabel: 'Insert', actions: INSERT_ACTIONS },
+  { kind: 'buttons', groupLabel: t('editor.inlineFormatting'), actions: INLINE_ACTIONS },
+  { kind: 'buttons', groupLabel: t('editor.mediaAndLinks'), actions: MEDIA_ACTIONS },
+  { kind: 'buttons', groupLabel: t('editor.insert'), actions: INSERT_ACTIONS },
 ]);
 
 const ACTIONS = [...BLOCK_MENU_ACTIONS, ...INLINE_ACTIONS, ...MEDIA_ACTIONS, ...INSERT_ACTIONS];

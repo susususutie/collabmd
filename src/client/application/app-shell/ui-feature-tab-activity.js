@@ -1,3 +1,4 @@
+import { t } from '../../i18n/index.js';
 /**
  * @typedef {object} UiTabActivityContext
  * @property {boolean} isTabActive
@@ -51,7 +52,7 @@ function handleTabActivated({ takeover = false } = {}) {
   }
 
   if (takeover) {
-    this.toastController.show('This tab is now active');
+    this.toastController.show(t('app.thisTabIsNowActive'));
   }
 }
 
@@ -97,7 +98,7 @@ async function handleTabBlocked({ reason } = {}) {
   this.renderChat();
 
   if (wasActive && reason === 'taken-over') {
-    this.toastController.show('Another tab took over this session');
+    this.toastController.show(t('app.anotherTabTookOverThisSession'));
   }
 }
 

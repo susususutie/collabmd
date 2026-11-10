@@ -2,6 +2,14 @@ import './styles/surfaces/embedded-editor-base.css';
 import './styles/surfaces/drawio-editor.css';
 
 import {
+  applyDocumentLocale,
+  getLocale,
+  initializeI18n,
+  localizeDocument,
+  t,
+} from './i18n/index.js';
+
+import {
   createDrawioFrameLoadPayload,
   createDrawioFrameLoadSignature,
 } from './domain/drawio-frame-load.js';
@@ -55,11 +63,11 @@ const banner = document.createElement('div');
 banner.className = 'drawio-banner';
 banner.innerHTML = `
   <div class="drawio-banner-status">
-    <span class="drawio-banner-pill" id="drawioModePill">Loading</span>
-    <span class="drawio-banner-copy" id="drawioBannerText">Connecting…</span>
+    <span class="drawio-banner-pill" id="drawioModePill">${t('common.loading')}</span>
+    <span class="drawio-banner-copy" id="drawioBannerText">${t('diagram.connecting')}</span>
   </div>
   <div class="drawio-banner-actions">
-    <button type="button" class="drawio-toolbar-btn" id="claimEditBtn" hidden>Claim edit</button>
+    <button type="button" class="drawio-toolbar-btn" id="claimEditBtn" hidden>${t('diagram.claimEdit')}</button>
   </div>
 `;
 
@@ -125,8 +133,8 @@ function updateBanner() {
     return;
   }
 
-  pill.textContent = state.isEditor ? 'Editing' : 'Read-only';
-  bannerText.textContent = state.bannerText || (state.isEditor ? 'Editing' : 'Read-only mode');
+  pill.textContent = state.isEditor ? t('diagram.editing') : t('diagram.readOnly');
+  bannerText.textContent = state.bannerText || (state.isEditor ? t('diagram.editing') : t('diagram.readOnlyMode'));
   claimEditButton.hidden = !state.canClaim;
   claimEditButton.disabled = !state.canClaim;
 }
@@ -167,6 +175,8 @@ function buildDrawioFrameUrl() {
   url.searchParams.set('spin', '1');
   url.searchParams.set('ui', currentTheme === 'light' ? 'simple' : 'dark');
   url.searchParams.set('libraries', '1');
+  // External draw.io host: pass the locale explicitly, it cannot read our localStorage.
+  url.searchParams.set('lang', getLocale());
   return url.toString();
 }
 
@@ -376,7 +386,7 @@ function attachDrawioFrame() {
       }
 
       if (isExportImageMode) {
-        renderError('Failed to export draw.io preview');
+        renderError(t('diagram.failedToExportDrawIoPreview'));
       }
       return;
     }
@@ -390,7 +400,7 @@ function attachDrawioFrame() {
 
   window.addEventListener('message', drawioMessageHandler);
   drawioFrameBootTimer = window.setTimeout(() => {
-    renderError('Failed to initialize draw.io editor', { fallbackToText: hostMode === 'file-preview' });
+    renderError(t('diagram.failedToInitializeDrawIoEditor'), { fallbackToText: hostMode === 'file-preview' });
   }, IFRAME_BOOT_TIMEOUT_MS);
 }
 
@@ -401,14 +411,14 @@ function handleLeaseState(nextState) {
   state.canClaim = Boolean(nextState?.canClaim);
 
   if (state.isEditor) {
-    state.bannerText = 'Changes save automatically.';
+    state.bannerText = t('diagram.changesSaveAutomatically');
   } else if (nextState?.hasHealthyHolder) {
-    const holderName = nextState.holderName || 'Another user';
-    state.bannerText = `${holderName} is editing this diagram. Read-only mode. Updates appear after they save.`;
+    const holderName = nextState.holderName || t('diagram.anotherUser');
+    state.bannerText = t('diagram.nameIsEditingThisDiagramReadOnlyModeUpdates', { name: holderName });
   } else if (nextState?.isStale) {
-    state.bannerText = 'Editor disconnected. Claim edit to continue editing.';
+    state.bannerText = t('diagram.editorDisconnectedClaimEditToContinueEditing');
   } else {
-    state.bannerText = 'Read-only mode. Updates appear after save.';
+    state.bannerText = t('diagram.readOnlyModeUpdatesAppearAfterSave');
   }
 
   updateBanner();
@@ -450,6 +460,9 @@ async function claimEdit() {
 window.addEventListener('keydown', handleQuickSwitcherKeyDown, { capture: true });
 
 async function init() {
+  initializeI18n();
+  applyDocumentLocale();
+  localizeDocument();
   setBodyTheme(currentTheme);
 
   try {
@@ -488,7 +501,7 @@ async function init() {
     if (requestedMode === 'view' || !drawioLeaseClient) {
       state.isEditor = false;
       state.canClaim = false;
-      state.bannerText = isExportImageMode ? 'Rendering preview…' : 'Read-only mode';
+      state.bannerText = isExportImageMode ? t('diagram.renderingPreview') : t('diagram.readOnlyMode');
       if (!isExportImageMode) {
         updateBanner();
       }
@@ -506,7 +519,7 @@ async function init() {
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);
     renderError(message, { fallbackToText: hostMode === 'file-preview' });
-    setLoadingCopy(`Failed to load draw.io: ${message}`, { isError: true });
+    setLoadingCopy(t('diagram.failedToLoadDrawIoMessage', { message }), { isError: true });
   }
 }
 

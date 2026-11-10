@@ -1,10 +1,11 @@
+import { t } from '../i18n/index.js';
 import { canvasColor, canvasEdgeGeometry, canvasFilePath, canvasLinkUrl, canvasSideAtPoint } from '../domain/canvas-view.js';
 import { getMarkdownHeadings } from '../domain/markdown-headings.js';
 import { flattenTree } from './file-tree-state.js';
 import { openCanvasPicker } from './canvas-picker.js';
 
 const SVG_NS = 'http://www.w3.org/2000/svg';
-const NODE_NAMES = { text: 'Text card', file: 'File card', link: 'Link card', group: 'Group' };
+const NODE_NAMES = { text: t('canvas.textCard'), file: t('canvas.fileCard'), link: t('canvas.linkCard'), group: t('common.group') };
 const ICON_PATHS = {
   text: 'M14 3H5v18h14V8Z M14 3v5h5',
   file: 'M14 3H5v18h14V8Z M14 3v5h5 M8 12h8 M8 16h6',
@@ -81,19 +82,19 @@ export class CanvasEditorView {
     this.root.classList.add('canvas-editor');
     this.toolbar = element('div', 'canvas-toolbar');
     this.toolbar.setAttribute('role', 'toolbar');
-    this.toolbar.setAttribute('aria-label', 'Canvas tools');
+    this.toolbar.setAttribute('aria-label', t('canvas.canvasTools'));
     this.editButtons = [];
     Object.entries(NODE_NAMES).forEach(([type, label]) => {
       const control = button(`+ ${label}`, () => this.addNode(type), type);
-      control.title = `Add ${label.toLowerCase()}`;
+      control.title = t('canvas.addLabel', { label: label.toLowerCase() });
       this.toolbar.append(control);
       this.editButtons.push(control);
     });
-    this.connectButton = button('Connect', () => this.beginConnection(), 'link');
-    this.deleteButton = button('Delete', () => this.removeSelection(), 'delete');
-    this.undoButton = button('Undo', () => this.actions.undo(), 'undo');
-    this.redoButton = button('Redo', () => this.actions.redo(), 'redo');
-    this.status = element('span', 'canvas-status', 'Connecting…');
+    this.connectButton = button(t('canvas.connect'), () => this.beginConnection(), 'link');
+    this.deleteButton = button(t('common.delete'), () => this.removeSelection(), 'delete');
+    this.undoButton = button(t('common.undo'), () => this.actions.undo(), 'undo');
+    this.redoButton = button(t('common.redo'), () => this.actions.redo(), 'redo');
+    this.status = element('span', 'canvas-status', t('canvas.connecting'));
     this.status.setAttribute('role', 'status');
     this.banner = element('div', 'canvas-banner');
     this.banner.hidden = true;
@@ -101,46 +102,46 @@ export class CanvasEditorView {
     this.body = element('div', 'canvas-body');
     this.stage = element('div', 'canvas-stage');
     this.stage.tabIndex = 0;
-    this.stage.setAttribute('aria-label', 'Canvas. Drag to select. Space-drag to pan. Use arrow keys to move selected cards.');
+    this.stage.setAttribute('aria-label', t('canvas.canvasDragToSelectSpaceDragToPanUseArrowKeysTo'));
     this.world = element('div', 'canvas-world');
-    this.edges = svgElement('svg', { class: 'canvas-edges', 'aria-label': 'Connections' });
+    this.edges = svgElement('svg', { class: 'canvas-edges', 'aria-label': t('canvas.connections') });
     this.world.append(this.edges);
     this.cursors = element('div', 'canvas-cursors');
     this.world.append(this.cursors);
     this.stage.append(this.world);
     this.emptyState = element('div', 'canvas-empty-state');
     this.emptyState.hidden = true;
-    this.emptyState.append(element('strong', '', 'Start your canvas'),
-      element('span', '', 'Double-click to add text, or choose a card below.'));
+    this.emptyState.append(element('strong', '', t('canvas.startYourCanvas')),
+      element('span', '', t('canvas.doubleClickToAddTextOrChooseACardBelow')));
     this.mountSelectionToolbar();
     this.inspector = element('aside', 'canvas-inspector');
-    this.inspector.setAttribute('aria-label', 'Canvas selection');
+    this.inspector.setAttribute('aria-label', t('canvas.canvasSelection'));
     this.inspector.id = 'canvas-properties';
     this.inspector.hidden = true;
     this.body.append(this.stage, this.inspector);
     this.navigation = element('div', 'canvas-navigation');
     this.navigation.setAttribute('role', 'toolbar');
-    this.navigation.setAttribute('aria-label', 'Canvas navigation');
+    this.navigation.setAttribute('aria-label', t('canvas.canvasNavigation'));
     const zoomTools = element('div', 'canvas-tool-group');
-    this.zoomLabel = button('Reset zoom', () => this.zoomBy(1 / this.viewport.zoom));
+    this.zoomLabel = button(t('canvas.resetZoom'), () => this.zoomBy(1 / this.viewport.zoom));
     this.zoomLabel.classList.add('canvas-zoom-label');
-    zoomTools.append(button('Zoom in', () => this.zoomBy(1.25), 'plus'), this.zoomLabel,
-      button('Fit canvas', () => this.fit(), 'fit'), button('Zoom out', () => this.zoomBy(0.8), 'minus'));
+    zoomTools.append(button(t('common.zoomIn'), () => this.zoomBy(1.25), 'plus'), this.zoomLabel,
+      button(t('canvas.fitCanvas'), () => this.fit(), 'fit'), button(t('common.zoomOut'), () => this.zoomBy(0.8), 'minus'));
     const historyTools = element('div', 'canvas-tool-group');
     historyTools.append(this.undoButton, this.redoButton);
     this.helpMenu = element('details', 'canvas-help-menu canvas-tool-group');
     const helpToggle = element('summary', 'canvas-button canvas-icon-button');
-    helpToggle.title = 'Canvas help';
-    helpToggle.setAttribute('aria-label', 'Canvas help');
+    helpToggle.title = t('canvas.canvasHelp');
+    helpToggle.setAttribute('aria-label', t('canvas.canvasHelp'));
     helpToggle.append(icon('help'));
     const helpContent = element('div', 'canvas-help-content');
-    helpContent.append(element('strong', '', 'Canvas shortcuts'));
+    helpContent.append(element('strong', '', t('canvas.canvasShortcuts')));
     for (const [gesture, description] of [
-      ['Double-click', 'Add or edit text'], ['Drag a card', 'Move it'], ['Drag background', 'Select cards'],
-      ['Drag a group', 'Move its enclosed cards'], ['Shift-drag', 'Select inside a group'],
-      ['Space / middle-drag', 'Pan canvas'], ['Ctrl / ⌘ + scroll', 'Zoom'],
-      ['Shift + 1 / 2', 'Fit canvas / selection'], ['Drag a dot', 'Connect cards'],
-      ['Choose section', 'Show a Markdown heading'],
+      [t('canvas.doubleClick'), t('canvas.addOrEditText')], [t('canvas.dragACard'), t('canvas.moveIt')], [t('canvas.dragBackground'), t('canvas.selectCards')],
+      [t('canvas.dragAGroup'), t('canvas.moveItsEnclosedCards')], [t('canvas.shiftDrag'), t('canvas.selectInsideAGroup')],
+      [t('canvas.spaceMiddleDrag'), t('canvas.panCanvas')], [t('canvas.ctrlScroll'), t('canvas.zoom')],
+      [t('canvas.shift12'), t('canvas.fitCanvasSelection')], [t('canvas.dragADot'), t('canvas.connectCards')],
+      [t('canvas.chooseSection'), t('canvas.showAMarkdownHeading')],
     ]) {
       const row = element('div');
       row.append(element('span', '', gesture), element('span', '', description));
@@ -212,15 +213,15 @@ export class CanvasEditorView {
   mountSelectionToolbar() {
     this.selectionToolbar = element('div', 'canvas-selection-toolbar');
     this.selectionToolbar.setAttribute('role', 'toolbar');
-    this.selectionToolbar.setAttribute('aria-label', 'Selection actions');
+    this.selectionToolbar.setAttribute('aria-label', t('canvas.selectionActions'));
     this.selectionToolbar.hidden = true;
-    this.editTextButton = button('Edit text', () => this.openTextEditor([...this.selection][0]), 'edit');
-    this.fileButton = button('Change file', () => this.openFilePicker([...this.selection][0]), 'file');
-    this.headingButton = button('Choose section', () => this.openHeadingPicker([...this.selection][0]));
+    this.editTextButton = button(t('canvas.editText'), () => this.openTextEditor([...this.selection][0]), 'edit');
+    this.fileButton = button(t('canvas.changeFile'), () => this.openFilePicker([...this.selection][0]), 'file');
+    this.headingButton = button(t('canvas.chooseSection'), () => this.openHeadingPicker([...this.selection][0]));
     this.headingButton.prepend(icon('section'));
     this.labelInput = element('input', 'canvas-connection-label');
-    this.labelInput.placeholder = 'Connection label';
-    this.labelInput.setAttribute('aria-label', 'Connection label');
+    this.labelInput.placeholder = t('canvas.connectionLabel');
+    this.labelInput.setAttribute('aria-label', t('canvas.connectionLabel'));
     this.labelInput.addEventListener('change', () => {
       if (this.canEdit && this.selectedEdge) this.actions.updateEdge(this.selectedEdge, { label: this.labelInput.value || undefined });
     });
@@ -233,25 +234,25 @@ export class CanvasEditorView {
     });
     this.colorMenu = element('details', 'canvas-color-menu');
     const colorToggle = element('summary', 'canvas-button canvas-icon-button');
-    colorToggle.title = 'Set color';
-    colorToggle.setAttribute('aria-label', 'Set color');
+    colorToggle.title = t('canvas.setColor');
+    colorToggle.setAttribute('aria-label', t('canvas.setColor'));
     colorToggle.append(icon('color'));
     this.colorMenu.append(colorToggle);
     const colors = element('div', 'canvas-colors');
     ['', '1', '2', '3', '4', '5', '6'].forEach((color) => {
       const swatch = button('', () => { this.setSelectionColor(color || undefined); this.colorMenu.open = false; });
-      swatch.setAttribute('aria-label', color ? `Color ${color}` : 'Default color');
-      swatch.title = color ? `Color ${color}` : 'Default color';
+      swatch.setAttribute('aria-label', color ? t('canvas.colorColor', { color }) : t('canvas.defaultColor'));
+      swatch.title = color ? t('canvas.colorColor', { color }) : t('canvas.defaultColor');
       swatch.style.setProperty('--canvas-color', canvasColor(color));
       colors.append(swatch);
     });
     const customColor = element('input');
     customColor.type = 'color';
-    customColor.setAttribute('aria-label', 'Custom color');
+    customColor.setAttribute('aria-label', t('canvas.customColor'));
     customColor.addEventListener('change', () => this.setSelectionColor(customColor.value));
     colors.append(customColor);
     this.colorMenu.append(colors);
-    this.propertiesButton = button('Properties', () => {
+    this.propertiesButton = button(t('canvas.properties'), () => {
       this.inspectorOpen = !this.inspectorOpen;
       this.renderInspector();
       this.positionSelectionToolbar();
@@ -308,7 +309,7 @@ export class CanvasEditorView {
     if (!this.canEdit) return;
     this.picker?.close();
     this.picker = openCanvasPicker({
-      root: this.root, title: 'Choose a Vault file',
+      root: this.root, title: t('canvas.chooseAVaultFile'),
       canChoose: () => this.canEdit && (!id || this.getNode(id)?.type === 'file'),
       loadChoices: async () => flattenTree((await this.readTree()).tree ?? []).files
         .filter(canvasFilePath).sort().map((path) => ({ value: path, label: path.split('/').pop(), detail: path, searchText: path })),
@@ -326,11 +327,11 @@ export class CanvasEditorView {
     const file = node.file;
     this.picker?.close();
     this.picker = openCanvasPicker({
-      root: this.root, title: 'Choose a heading',
+      root: this.root, title: t('canvas.chooseAHeading'),
       canChoose: () => this.canEdit && this.getNode(id)?.type === 'file' && this.getNode(id).file === file,
       loadChoices: async () => {
         const { content } = await this.readFile(file);
-        return [{ value: '', label: 'Whole file', detail: file },
+        return [{ value: '', label: t('canvas.wholeFile'), detail: file },
           ...getMarkdownHeadings(content).map(({ id: anchor, text }) => ({ value: `#${anchor}`, label: text, detail: `#${anchor}` }))];
       },
       onChoose: (subpath) => this.actions.updateNode(id, { subpath: subpath || undefined }),
@@ -347,12 +348,12 @@ export class CanvasEditorView {
       const position = this.toWorld(event.clientX - bounds.left, event.clientY - bounds.top);
       const files = flattenTree((await this.readTree()).tree ?? []).files;
       if (!this.abort.signal.aborted && this.canEdit && files.includes(payload.path)) this.addNode('file', position, { file: payload.path });
-    } catch { this.status.textContent = 'Unable to add this file. Choose a file from this Vault.'; }
+    } catch { this.status.textContent = t('canvas.unableToAddThisFileChooseAFileFromThisVault'); }
   }
 
   update({ document: next, canEdit, synced, conflict, error, undoAvailable, redoAvailable }) {
     this.canEdit = canEdit;
-    this.status.textContent = error || (conflict ? 'External file conflict' : (canEdit ? 'Live' : (synced ? 'Read only' : 'Reconnecting…')));
+    this.status.textContent = error || (conflict ? t('canvas.externalFileConflict') : (canEdit ? t('canvas.live') : (synced ? t('canvas.readOnly') : t('canvas.reconnecting'))));
     this.status.dataset.state = canEdit ? 'live' : 'readonly';
     this.root.dataset.ready = String(Boolean(next));
     this.root.dataset.editable = String(canEdit);
@@ -400,12 +401,12 @@ export class CanvasEditorView {
     this.banner.hidden = !conflict;
     if (!conflict) return;
     this.banner.append(element('span', '', conflict.invalid
-      ? 'The file changed outside CollabMD and is invalid. Your canvas edits are preserved.'
-      : 'The file changed outside CollabMD. Choose which version to keep.'));
-    const keep = button('Keep canvas edits', () => this.actions.resolveConflict('local'));
+      ? t('canvas.theFileChangedOutsideCollabmdAndIsInvalidYour')
+      : t('canvas.theFileChangedOutsideCollabmdChooseWhichVersion')));
+    const keep = button(t('canvas.keepCanvasEdits'), () => this.actions.resolveConflict('local'));
     keep.disabled = !synced;
     this.banner.append(keep);
-    const external = button('Use external version', () => this.actions.resolveConflict('external'));
+    const external = button(t('canvas.useExternalVersion'), () => this.actions.resolveConflict('external'));
     external.disabled = !synced || conflict.invalid;
     this.banner.append(external);
   }
@@ -418,14 +419,14 @@ export class CanvasEditorView {
       card.tabIndex = 0;
       const header = element('div', 'canvas-card-header');
       const title = element('span', 'canvas-card-title');
-      const openFile = button('Open file', () => {
+      const openFile = button(t('canvas.openFile'), () => {
         const current = this.getNode(node.id);
         if (current?.type === 'file') this.onOpenFile(current.file, current.subpath);
       }, 'open');
       openFile.classList.add('canvas-open-file');
       header.append(title, openFile);
       const content = element('div', 'canvas-card-content');
-      const resize = button('Resize', () => {}, 'resize');
+      const resize = button(t('canvas.resize'), () => {}, 'resize');
       resize.classList.add('canvas-resize');
       card.append(header, content, resize);
       this.world.append(card);
@@ -451,8 +452,8 @@ export class CanvasEditorView {
         });
         handle.classList.add('canvas-connection-handle');
         handle.dataset.side = side;
-        handle.setAttribute('aria-label', `Connect from ${side}`);
-        handle.title = `Drag to connect from ${side}`;
+        handle.setAttribute('aria-label', t('canvas.connectFromSide', { side }));
+        handle.title = t('canvas.dragToConnectFromSide', { side });
         handle.addEventListener('pointerdown', (event) => this.startConnection(event, node.id, side));
         card.append(handle);
       }
@@ -467,12 +468,12 @@ export class CanvasEditorView {
     entry.card.style.zIndex = String(index + 1);
     entry.card.style.setProperty('--canvas-color', canvasColor(node.color));
     entry.header.hidden = node.type === 'text';
-    entry.title.textContent = node.type === 'group' ? node.label || 'Group'
-      : (node.type === 'file' ? `${node.file.split('/').pop() || 'Choose a file'}${node.subpath ? ` › ${entry.headingLabel || node.subpath.slice(1)}` : ''}` : node.url);
+    entry.title.textContent = node.type === 'group' ? node.label || t('common.group')
+      : (node.type === 'file' ? `${node.file.split('/').pop() || t('canvas.chooseAFile')}${node.subpath ? ` › ${entry.headingLabel || node.subpath.slice(1)}` : ''}` : node.url);
     entry.title.title = node.type === 'file' ? `${node.file}${node.subpath || ''}` : entry.title.textContent;
     entry.openFile.hidden = node.type !== 'file' || !canvasFilePath(node.file);
-    entry.openFile.setAttribute('aria-label', `Open ${node.file || ''}${node.subpath || ''}`);
-    entry.openFile.title = `Open ${node.file || ''}${node.subpath || ''}`;
+    entry.openFile.setAttribute('aria-label', t('canvas.openName', { name: `${node.file || ''}${node.subpath || ''}` }));
+    entry.openFile.title = t('canvas.openName', { name: `${node.file || ''}${node.subpath || ''}` });
     entry.card.setAttribute('aria-label', `${NODE_NAMES[node.type]}: ${node.text?.slice(0, 80) || node.label || node.file || node.url || ''}`);
     entry.card.classList.toggle('is-selected', this.selection.has(node.id));
     entry.resize.disabled = !this.canEdit;
@@ -502,7 +503,7 @@ export class CanvasEditorView {
   async renderFile(entry, node, signature) {
     const path = canvasFilePath(node.file);
     if (!path) {
-      entry.content.append(element('span', '', 'This file path is unavailable in the Vault.'));
+      entry.content.append(element('span', '', t('canvas.thisFilePathIsUnavailableInTheVault')));
       return;
     }
     if (/\.(png|jpe?g|gif|webp|svg)$/i.test(path)) {
@@ -510,7 +511,7 @@ export class CanvasEditorView {
       image.src = this.attachmentUrl(path);
       image.alt = path;
       image.loading = 'lazy';
-      image.addEventListener('error', () => { image.replaceWith(element('p', '', 'Image unavailable')); });
+      image.addEventListener('error', () => { image.replaceWith(element('p', '', t('canvas.imageUnavailable'))); });
       entry.content.append(image);
     } else if (/\.(md|markdown|mdx)$/i.test(path)) {
       const preview = element('div', 'canvas-file-markdown');
@@ -524,10 +525,10 @@ export class CanvasEditorView {
           entry.content.scrollTop = 0;
         }
       } catch {
-        if (entry.signature === signature) preview.textContent = 'File unavailable';
+        if (entry.signature === signature) preview.textContent = t('canvas.fileUnavailable');
       }
     } else {
-      entry.content.append(element('p', '', 'Open this file in the workspace.'));
+      entry.content.append(element('p', '', t('canvas.openThisFileInTheWorkspace')));
     }
   }
 
@@ -537,7 +538,7 @@ export class CanvasEditorView {
     if (this.connectFrom && id !== this.connectFrom.id && this.canEdit) {
       this.actions.addEdge({ fromNode: this.connectFrom.id, toNode: id, ...(this.connectFrom.side ? { fromSide: this.connectFrom.side } : {}) });
       this.connectFrom = null;
-      this.help.textContent = 'Connection added';
+      this.help.textContent = t('canvas.connectionAdded');
     }
     this.closeTextEditor();
     this.selectedEdge = null;
@@ -593,7 +594,7 @@ export class CanvasEditorView {
       this.actions.addEdge({ fromNode, toNode });
     } else {
       this.connectFrom = { id: id || [...this.selection][0], side };
-      this.help.textContent = 'Select another card to connect. Escape cancels.';
+      this.help.textContent = t('canvas.selectAnotherCardToConnectEscapeCancels');
     }
   }
 
@@ -603,7 +604,7 @@ export class CanvasEditorView {
     const center = position || this.toWorld(this.stage.clientWidth / 2, this.stage.clientHeight / 2);
     const width = type === 'group' ? 480 : 280;
     const height = type === 'group' ? 360 : 200;
-    const defaults = { text: { text: '' }, file: { file: '' }, link: { url: 'https://' }, group: { label: 'Group' } };
+    const defaults = { text: { text: '' }, file: { file: '' }, link: { url: 'https://' }, group: { label: t('common.group') } };
     const id = this.actions.addNode({ type, x: Math.round(center.x - width / 2), y: Math.round(center.y - height / 2), width, height, ...defaults[type], ...values });
     if (id) {
       this.select(id);
@@ -635,7 +636,7 @@ export class CanvasEditorView {
       const geometry = canvasEdgeGeometry(edge, nodes);
       if (!geometry) return;
       const group = svgElement('g', { class: `canvas-edge${this.selectedEdge === edge.id ? ' is-selected' : ''}`,
-        'data-edge-id': edge.id, tabindex: 0, role: 'button', 'aria-label': `Connection ${edge.label || edge.id}` });
+        'data-edge-id': edge.id, tabindex: 0, role: 'button', 'aria-label': t('canvas.connectionName', { name: edge.label || edge.id }) });
       if (edge.color) group.style.setProperty('--canvas-color', canvasColor(edge.color));
       const path = svgElement('path', { d: geometry.path, class: 'canvas-edge-line' });
       if (edge.fromEnd === 'arrow') path.setAttribute('marker-start', 'url(#canvas-arrow)');
@@ -671,11 +672,11 @@ export class CanvasEditorView {
     const edge = (this.document.edges ?? []).find((entry) => entry.id === this.selectedEdge);
     const selected = node || edge;
     const header = element('div', 'canvas-inspector-header');
-    header.append(element('h2', '', node ? NODE_NAMES[node.type] : (edge ? 'Connection' : 'Canvas')),
-      button('Close properties', () => { this.propertiesButton.click(); this.propertiesButton.focus(); }, 'close'));
+    header.append(element('h2', '', node ? NODE_NAMES[node.type] : (edge ? t('canvas.connection') : t('common.canvas'))),
+      button(t('canvas.closeProperties'), () => { this.propertiesButton.click(); this.propertiesButton.focus(); }, 'close'));
     this.inspector.append(header);
     if (!selected) {
-      this.inspector.append(element('p', '', this.selection.size ? `${this.selection.size} cards selected` : 'Select a card or connection to edit its properties.'));
+      this.inspector.append(element('p', '', this.selection.size ? t('canvas.countCardsSelected', { count: this.selection.size }) : t('canvas.selectACardOrConnectionToEditItsProperties')));
       return;
     }
     const currentSelection = () => node ? this.getNode(node.id) : (this.document.edges ?? []).find((entry) => entry.id === edge.id);
@@ -722,36 +723,36 @@ export class CanvasEditorView {
     };
     if (node) {
       if (node.type === 'file') {
-        field('Vault file', 'file');
-        field('Heading or block (#...)', 'subpath', { optional: true });
+        field(t('canvas.vaultFile'), 'file');
+        field(t('canvas.headingOrBlock'), 'subpath', { optional: true });
       }
       if (node.type === 'link') field('URL', 'url');
       if (node.type === 'group') {
-        field('Label', 'label', { optional: true });
-        field('Background image', 'background', { optional: true });
-        field('Background style', 'backgroundStyle', { optional: true, options: [['', 'Default'], ['cover', 'Cover'], ['ratio', 'Keep ratio'], ['repeat', 'Repeat']] });
+        field(t('common.label'), 'label', { optional: true });
+        field(t('canvas.backgroundImage'), 'background', { optional: true });
+        field(t('canvas.backgroundStyle'), 'backgroundStyle', { optional: true, options: [['', t('common.default')], ['cover', t('canvas.cover')], ['ratio', t('canvas.keepRatio')], ['repeat', t('canvas.repeat')]] });
       }
       ['x', 'y', 'width', 'height'].forEach((key) => field(key[0].toUpperCase() + key.slice(1), key, { numeric: true }));
       const order = element('div', 'canvas-order');
       ['back', 'front'].forEach((direction) => {
-        const control = button(`Send to ${direction}`, () => this.actions.reorderNode(node.id, direction));
+        const control = button(t('canvas.sendToDirection', { direction }), () => this.actions.reorderNode(node.id, direction));
         control.disabled = !this.canEdit;
         order.append(control);
       });
       this.inspector.append(order);
     } else {
-      field('Label', 'label', { optional: true });
+      field(t('common.label'), 'label', { optional: true });
       const nodeOptions = (this.document.nodes ?? []).map((entry) => [entry.id, `${NODE_NAMES[entry.type]}: ${(entry.text || entry.label || entry.file || entry.url || entry.id).slice(0, 40)}`]);
-      field('From card', 'fromNode', { options: nodeOptions });
+      field(t('canvas.fromCard'), 'fromNode', { options: nodeOptions });
       field('To card', 'toNode', { options: nodeOptions });
       ['from', 'to'].forEach((end) => {
-        field(`${end === 'from' ? 'Start' : 'End'} side`, `${end}Side`, { optional: true,
-          options: [['', 'Automatic'], ...['top', 'right', 'bottom', 'left'].map((value) => [value, value])] });
-        field(`${end === 'from' ? 'Start' : 'End'} marker`, `${end}End`, { optional: true,
-          options: [['', 'Default'], ['none', 'None'], ['arrow', 'Arrow']] });
+        field(t(end === 'from' ? 'canvas.startSide' : 'canvas.endSide'), `${end}Side`, { optional: true,
+          options: [['', t('canvas.automatic')], ...['top', 'right', 'bottom', 'left'].map((value) => [value, value])] });
+        field(t(end === 'from' ? 'canvas.startMarker' : 'canvas.endMarker'), `${end}End`, { optional: true,
+          options: [['', t('common.default')], ['none', t('common.none')], ['arrow', t('canvas.arrow')]] });
       });
     }
-    field('Color (1–6 or #RRGGBB)', 'color', { optional: true });
+    field(t('canvas.color16OrRrggbb'), 'color', { optional: true });
   }
 
   startNodeDrag(event, id, resize = false) {
@@ -956,7 +957,7 @@ export class CanvasEditorView {
       (Array.isArray(user.selectedNodeIds) ? user.selectedNodeIds : []).forEach((id) => this.nodes.get(id)?.card.classList.add('is-remote-selected'));
       const { x, y } = user.pointer ?? {};
       if (!Number.isFinite(x) || !Number.isFinite(y)) return;
-      const cursor = element('span', 'canvas-cursor', `↖ ${String(user.name || 'Collaborator').slice(0, 32)}`);
+      const cursor = element('span', 'canvas-cursor', `↖ ${String(user.name || t('canvas.collaborator')).slice(0, 32)}`);
       cursor.style.left = `${x}px`;
       cursor.style.top = `${y}px`;
       cursor.style.setProperty('--canvas-color', canvasColor(user.color));

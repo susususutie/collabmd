@@ -1,4 +1,5 @@
 import { stripVaultFileExtension } from '../../domain/file-kind.js';
+import { getLocale, t } from '../i18n/index.js';
 import { getVaultPathLeaf, getVaultPathParent } from '../domain/vault-paths.js';
 import {
   createCommentOverviewThread,
@@ -45,7 +46,7 @@ export class CommentOverviewController {
     this.loading = false;
     this.errorMessage = '';
     this.refreshPromise = null;
-    this.timeFormatter = new Intl.DateTimeFormat(undefined, {
+    this.timeFormatter = new Intl.DateTimeFormat(getLocale(), {
       day: 'numeric',
       hour: 'numeric',
       minute: '2-digit',
@@ -77,8 +78,8 @@ export class CommentOverviewController {
         this.setOverview(payload?.overview ?? payload ?? {}, { render: false });
       } catch (error) {
         console.error('[comments] Failed to load comment overview:', error.message);
-        this.errorMessage = 'Unable to load open comments.';
-        this.toastController?.show?.('Failed to load comments');
+        this.errorMessage = t('comment.unableToLoadOpenComments');
+        this.toastController?.show?.(t('comment.failedToLoadComments'));
       } finally {
         this.loading = false;
         this.refreshPromise = null;
@@ -113,7 +114,7 @@ export class CommentOverviewController {
     if (this.errorMessage) {
       const error = createOverviewState({
         copy: this.errorMessage,
-        title: 'Comments unavailable',
+        title: t('comment.commentsUnavailable'),
         tone: 'error',
       });
       error.setAttribute('role', 'alert');
@@ -123,8 +124,8 @@ export class CommentOverviewController {
 
     if (this.loading && asArray(this.overview.files).length === 0) {
       const loading = createOverviewState({
-        copy: 'Checking the vault for active threads…',
-        title: 'Loading comments',
+        copy: t('comment.checkingTheVaultForActiveThreads'),
+        title: t('comment.loadingComments'),
       });
       loading.setAttribute('role', 'status');
       this.panel.appendChild(loading);
@@ -134,8 +135,8 @@ export class CommentOverviewController {
     const files = asArray(this.overview.files);
     if (files.length === 0) {
       const empty = createOverviewState({
-        copy: 'Open comments from any document will appear here.',
-        title: 'You’re all caught up',
+        copy: t('comment.openCommentsFromAnyDocumentWillAppearHere'),
+        title: t('comment.youReAllCaughtUp'),
       });
       this.panel.appendChild(empty);
       return;
@@ -184,11 +185,11 @@ export class CommentOverviewController {
   createThreadButton(filePath, thread) {
     const messageCount = Number(thread.messageCount || 0);
     const button = createCommentOverviewThread({
-      authorName: thread.latestMessage?.userName || thread.createdByName || 'Anonymous',
+      authorName: thread.latestMessage?.userName || thread.createdByName || t('comment.anonymous'),
       lineLabel: formatAnchorLabel(thread.anchor),
       messageCount,
       previewBody: thread.latestMessage?.bodyPreview || '',
-      quote: thread.anchor?.quote || 'Source anchored comment',
+      quote: thread.anchor?.quote || t('comment.sourceAnchoredComment'),
       timestamp: this.formatTimestamp(thread.latestActivityAt),
     });
     button.addEventListener('click', () => {

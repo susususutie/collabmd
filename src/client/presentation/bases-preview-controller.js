@@ -1,3 +1,4 @@
+import { t } from '../i18n/index.js';
 import { isImageAttachmentFilePath } from '../../domain/file-kind.js';
 import { resolveApiUrl } from '../domain/runtime-paths.js';
 import { escapeHtml } from '../domain/vault-utils.js';
@@ -312,9 +313,9 @@ function getCachedPropertyValueOptions(entry, propertyId = '', result = entry?.r
 
 function renderActionButtons(result, entry) {
   return [
-    buildToolbarButton('Sort', 'sort', entry, result),
-    buildToolbarButton('Filter', 'filter', entry, result),
-    buildToolbarButton('Properties', 'properties', entry, result),
+    buildToolbarButton(t('common.sort'), 'sort', entry, result),
+    buildToolbarButton(t('common.filter'), 'filter', entry, result),
+    buildToolbarButton(t('base.properties'), 'properties', entry, result),
   ].join('');
 }
 
@@ -324,7 +325,7 @@ function createSelectOptions(result, {
 } = {}) {
   const options = [];
   if (allowBlank) {
-    options.push(`<option value=""${selected ? '' : ' selected'}>Property</option>`);
+    options.push(`<option value=""${selected ? '' : ' selected'}>${t('base.property')}</option>`);
   }
 
   getAvailableProperties(result).forEach((property) => {
@@ -778,7 +779,7 @@ function renderFilterSuggestionList(presentation, currentValue = '') {
 
 function renderFilterValueCombobox(result, rule, path, entry) {
   const presentation = buildFilterValuePresentation(result, rule, path, entry);
-  const filterLabel = `Filter ${formatFilterPath(path)}`;
+  const filterLabel = t('base.filterPath', { path: formatFilterPath(path) });
   return `
     <div class="bases-filter-value-combobox${presentation.suggestionsEnabled ? ' has-suggestions' : ''}">
       <input class="${escapeHtml(presentation.valueInputClasses)}" type="text" value="${escapeHtml(rule.value ?? '')}" data-base-filter-value="${escapeHtml(presentation.encodedPath)}" aria-label="${filterLabel} value"${presentation.suggestionsEnabled ? ` aria-controls="${presentation.suggestionListId}" aria-haspopup="listbox" aria-autocomplete="list" autocomplete="off"` : ''}${presentation.valueDisabled ? ' disabled' : ''}>
@@ -789,7 +790,7 @@ function renderFilterValueCombobox(result, rule, path, entry) {
 
 function renderFilterRule(result, rule, path, entry) {
   const presentation = buildFilterValuePresentation(result, rule, path, entry);
-  const filterLabel = `Filter ${formatFilterPath(path)}`;
+  const filterLabel = t('base.filterPath', { path: formatFilterPath(path) });
 
   return `
     <div class="bases-filter-row">
@@ -826,7 +827,7 @@ function syncFilterValueCombobox(entry, result, path, { fallbackToFullRender = t
   combobox.classList.toggle('has-suggestions', presentation.suggestionsEnabled);
   input.className = presentation.valueInputClasses;
   input.disabled = presentation.valueDisabled;
-  input.setAttribute('aria-label', `Filter ${formatFilterPath(path)} value`);
+  input.setAttribute('aria-label', t('base.filterPathValue', { path: formatFilterPath(path) }));
   if (input.value !== String(rule.value ?? '')) {
     input.value = String(rule.value ?? '');
   }
@@ -869,15 +870,15 @@ function forEachFilterRule(node, callback, path = []) {
 
 function renderFilterGroup(result, group, path, entry, { isRoot = false } = {}) {
   const encodedPath = encodePath(path);
-  const groupLabel = isRoot ? 'Root filter group' : `Filter group ${formatFilterPath(path)}`;
+  const groupLabel = isRoot ? t('base.rootFilterGroup') : t('base.filterGroupPath', { path: formatFilterPath(path) });
   return `
     <div class="bases-filter-group"${isRoot ? ' data-base-filter-root' : ''}>
       <div class="bases-filter-group-header">
         <select class="${escapeHtml(inputClassNames({ extra: 'bases-select bases-filter-conjunction' }))}" data-base-filter-conjunction="${escapeHtml(encodedPath)}" aria-label="${groupLabel} condition">
           ${['and', 'or', 'not'].map((conjunction) => `<option value="${conjunction}"${group.conjunction === conjunction ? ' selected' : ''}>${escapeHtml({
-    and: 'All the following are true',
-    not: 'None of the following are true',
-    or: 'Any of the following are true',
+    and: t('base.allTheFollowingAreTrue'),
+    not: t('base.noneOfTheFollowingAreTrue'),
+    or: t('base.anyOfTheFollowingAreTrue'),
   }[conjunction])}</option>`).join('')}
         </select>
         ${isRoot ? '' : `<button type="button" class="${escapeHtml(buttonClassNames({ variant: 'secondary', size: 'compact' }))}" data-base-filter-remove="${escapeHtml(encodedPath)}" aria-label="Delete ${groupLabel.toLowerCase()}">Delete group</button>`}
@@ -1076,18 +1077,18 @@ function renderShellHtml(result, entry) {
           <div class="${escapeHtml(segmentedControlClassNames({ pill: true, extra: 'bases-tabs' }))}" data-base-tabs>
             ${renderViewTabs(result)}
           </div>
-          <div class="bases-meta" data-base-meta>${escapeHtml(String(result.totalRows ?? 0))} results</div>
+          <div class="bases-meta" data-base-meta>${escapeHtml(t('base.countResults', { count: result.totalRows ?? 0 }))}</div>
         </div>
         <div class="bases-toolbar-actions">
           <div class="bases-toolbar-edit-actions" data-base-action-slot>${renderActionButtons(result, entry)}</div>
-          <label class="bases-search-shell" aria-label="Search this base">
+          <label class="bases-search-shell" aria-label="${t('base.searchThisBase')}">
             <svg class="bases-search-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
               <circle cx="11" cy="11" r="7"></circle>
               <path d="m20 20-3.5-3.5"></path>
             </svg>
-            <input class="${escapeHtml(inputClassNames({ extra: 'bases-search-input' }))}" type="search" value="${escapeHtml(entry.search)}" placeholder="Search this base" aria-label="Search this base">
+            <input class="${escapeHtml(inputClassNames({ extra: 'bases-search-input' }))}" type="search" value="${escapeHtml(entry.search)}" placeholder="${t('base.searchThisBase')}" aria-label="${t('base.searchThisBase')}">
           </label>
-          <button type="button" class="${escapeHtml(buttonClassNames({ variant: 'secondary', pill: true, extra: 'bases-export-btn' }))}">Export CSV</button>
+          <button type="button" class="${escapeHtml(buttonClassNames({ variant: 'secondary', pill: true, extra: 'bases-export-btn' }))}">${t('base.exportCsv')}</button>
         </div>
       </header>
       <div class="bases-panels" data-base-panel-slot>${renderPanel(result, entry)}</div>
@@ -1137,7 +1138,7 @@ function updateShellContent(entry, result, {
 
   const metaSlot = shell.querySelector('[data-base-meta]');
   if (meta && metaSlot) {
-    metaSlot.textContent = `${String(result.totalRows ?? 0)} results`;
+    metaSlot.textContent = t('base.countResults', { count: result.totalRows ?? 0 });
   }
 
   const actionSlot = shell.querySelector('[data-base-action-slot]');
@@ -1741,7 +1742,7 @@ export class BasesPreviewController {
         revokeDelayMs: 0,
       });
     } catch (error) {
-      this.toastController?.show?.(error.message || 'Failed to export base CSV');
+      this.toastController?.show?.(error.message || t('base.failedToExportBaseCsv'));
     }
   }
 
@@ -1827,7 +1828,7 @@ export class BasesPreviewController {
       entry.ui.rawFilterText = serializeRawFilterText(getEditableViewConfig(entry.result).filters);
       updateShellContent(entry, entry.result);
     } catch (error) {
-      this.toastController?.show?.(error.message || 'Failed to update base');
+      this.toastController?.show?.(error.message || t('base.failedToUpdateBase'));
     }
   }
 
@@ -1852,7 +1853,7 @@ export class BasesPreviewController {
         return config;
       });
     } catch (error) {
-      this.toastController?.show?.(error.message || 'Invalid advanced filter');
+      this.toastController?.show?.(error.message || t('base.invalidAdvancedFilter'));
     }
   }
 }
